@@ -6,10 +6,10 @@
       name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
     />
-    <title>됴무실 — Office Stress Break</title>
+    <title>됴무실 — Office Stress Break (Extreme Action Edition)</title>
     <meta
       name="description"
-      content="직장 스트레스를 게임 속에서 마음껏 해소하는 됴무실"
+      content="직장 스트레스를 현란한 액션으로 마음껏 해소하는 됴무실"
     />
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@500;700;800&display=swap");
@@ -47,9 +47,7 @@
           0 3px 12px #182b36;
       }
       .brand {
-        font:
-          400 30px "Black Han Sans",
-          sans-serif;
+        font: 400 30px "Black Han Sans", sans-serif;
         letter-spacing: 3px;
       }
       .tag {
@@ -71,9 +69,7 @@
         background: var(--glass);
         border-radius: 99px;
         padding: 8px 13px;
-        font:
-          700 12px "Noto Sans KR",
-          sans-serif;
+        font: 700 12px "Noto Sans KR", sans-serif;
         color: #304b55;
         box-shadow: 0 5px 20px #172b3622;
       }
@@ -147,13 +143,12 @@
         color: #29424b;
         border-radius: 13px;
         padding: 12px 15px;
-        font:
-          800 12px "Noto Sans KR",
-          sans-serif;
+        font: 800 12px "Noto Sans KR", sans-serif;
         cursor: pointer;
+        transition: transform 0.1s;
       }
       .action:active {
-        transform: scale(0.95);
+        transform: scale(0.92);
       }
       #fx {
         position: fixed;
@@ -164,29 +159,45 @@
       }
       .pop {
         position: absolute;
-        font:
-          400 34px "Black Han Sans",
-          sans-serif;
+        font: 400 34px "Black Han Sans", sans-serif;
         color: #fff;
         transform: translate(-50%, -50%) rotate(-7deg);
         -webkit-text-stroke: 6px #c0392b;
         paint-order: stroke fill;
-        animation: pop 0.9s ease-out forwards;
+        animation: pop 0.8s ease-out forwards;
         white-space: nowrap;
       }
       @keyframes pop {
         0% {
-          transform: translate(-50%, -30%) rotate(-7deg) scale(0.3);
+          transform: translate(-50%, -20%) rotate(-7deg) scale(0.2);
           opacity: 0;
         }
-        15% {
-          transform: translate(-50%, -60%) rotate(-7deg) scale(1.25);
+        20% {
+          transform: translate(-50%, -50%) rotate(-7deg) scale(1.35);
           opacity: 1;
         }
         100% {
-          transform: translate(-50%, -150%) rotate(-7deg) scale(1);
+          transform: translate(-50%, -130%) rotate(-7deg) scale(1);
           opacity: 0;
         }
+      }
+      #comboCount {
+        position: fixed;
+        left: 50%;
+        top: 20%;
+        transform: translate(-50%, -50%);
+        font: 400 64px "Black Han Sans", sans-serif;
+        color: #ffda44;
+        -webkit-text-stroke: 4px #d32f2f;
+        text-shadow: 0 0 20px rgba(255, 87, 34, 0.8);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s, transform 0.1s;
+        z-index: 10;
+      }
+      #comboCount.active {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
       }
       #flash {
         position: fixed;
@@ -238,223 +249,28 @@
         border: 1px solid #fffe;
         background: #fffbf0f2;
         border-radius: 16px;
-        font:
-          800 12px "Noto Sans KR",
-          sans-serif;
+        font: 800 12px "Noto Sans KR", sans-serif;
         color: #29424b;
         touch-action: manipulation;
       }
-      #mobileActions button:active {
-        transform: scale(0.94);
-        background: #dce9e2;
-      }
       @media (max-width: 700px) {
-        .brand {
-          font-size: 21px;
-        }
-        .tag {
-          font-size: 8px;
-        }
-        .top {
-          left: 10px;
-          top: 8px;
-        }
-        .hud {
-          right: 7px;
-          top: 7px;
-        }
-        .pill {
-          padding: 6px 8px;
-          font-size: 9px;
-        }
-        #gauge {
-          left: 10px;
-          top: 48px;
-          width: 150px;
-        }
-        .help,
-        #actionbar {
-          display: none;
-        }
-        #mobile {
-          display: block;
-        }
-        #mobileActions {
-          display: flex;
-        }
-        #status {
-          max-width: 110px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .pop {
-          font-size: 26px;
-        }
-      }
-      @media (max-width: 700px) {
-        .hud {
-          flex-wrap: wrap;
-          justify-content: flex-end;
-          max-width: 64vw;
-        }
-      }
-      .tog {
-        min-width: 104px;
-        background: #d9dedd;
-        color: #6b7b82;
-        border-color: #fff8;
-      }
-      .tog.on {
-        background: #2f9e6a;
-        color: #fff;
-        border-color: #2f9e6a;
-        box-shadow:
-          0 0 0 3px #2f9e6a33,
-          0 5px 20px #172b3622;
-      }
-      #rkhud {
-        display: none;
-        position: fixed;
-        top: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 5;
-        gap: 16px;
-        align-items: center;
-        background: #203541ee;
-        color: #fff;
-        border-radius: 18px;
-        padding: 8px 20px;
-        font-weight: 800;
-        font-size: 22px;
-        white-space: nowrap;
-      }
-      #rkTime.warn {
-        color: #ff7a6a;
-      }
-      #cd {
-        display: none;
-        position: fixed;
-        left: 0;
-        right: 0;
-        top: 32%;
-        z-index: 35;
-        text-align: center;
-        font:
-          400 110px "Black Han Sans",
-          sans-serif;
-        color: #fff;
-        -webkit-text-stroke: 8px #c0392b;
-        paint-order: stroke fill;
-        pointer-events: none;
-      }
-      #modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 40;
-        background: #10202a99;
-        align-items: center;
-        justify-content: center;
-      }
-      .mb {
-        background: #fff;
-        border-radius: 20px;
-        padding: 22px;
-        width: min(92vw, 380px);
-        max-height: 90vh;
-        overflow: auto;
-        text-align: center;
-        box-shadow: 0 20px 60px #0008;
-        font-weight: 700;
-      }
-      .mb h2 {
-        margin: 0 0 8px;
-        font-size: 22px;
-      }
-      .mb p {
-        margin: 6px 0;
-      }
-      .dim {
-        color: #6b7b82;
-        font-size: 12px;
-        font-weight: 600;
-      }
-      .mb input {
-        width: 100%;
-        padding: 11px;
-        border: 2px solid #cfd8d6;
-        border-radius: 12px;
-        font: 700 16px inherit;
-        text-align: center;
-        margin: 8px 0;
-      }
-      .big {
-        font:
-          400 52px "Black Han Sans",
-          sans-serif;
-        color: #c0392b;
-        margin: 4px 0;
-      }
-      .btns {
-        display: flex;
-        gap: 8px;
-        margin-top: 12px;
-      }
-      .btns button {
-        flex: 1;
-        border: 0;
-        border-radius: 12px;
-        padding: 12px;
-        font: 800 14px inherit;
-        background: #2f9e6a;
-        color: #fff;
-        cursor: pointer;
-      }
-      .btns button.sub {
-        background: #d9dedd;
-        color: #44545b;
-      }
-      .bt {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 8px;
-        font-size: 14px;
-      }
-      .bt td {
-        padding: 6px 8px;
-        border-bottom: 1px solid #eef1f0;
-      }
-      .bt td:first-child {
-        width: 36px;
-      }
-      .bt td:last-child {
-        text-align: right;
-        font-weight: 800;
-      }
-      .bt tr.me {
-        background: #fff3c9;
+        .brand { font-size: 21px; }
+        .tag { font-size: 8px; }
+        .top { left: 10px; top: 8px; }
+        .hud { right: 7px; top: 7px; flex-wrap: wrap; justify-content: flex-end; max-width: 64vw; }
+        .pill { padding: 6px 8px; font-size: 9px; }
+        #gauge { left: 10px; top: 48px; width: 150px; }
+        .help, #actionbar { display: none; }
+        #mobile, #mobileActions { display: flex; }
+        #mobileActions { display: flex; }
       }
     </style>
-    <!-- 됴무실 앱 아이콘 -->
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-<!-- 브라우저 아이콘 -->
-<link rel="icon" type="image/png" href="/apple-touch-icon.png">
-
-<!-- iPhone 웹 앱 설정 -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="됴무실">
-<meta name="mobile-web-app-capable" content="yes">
   </head>
   <body>
     <div id="world"></div>
     <div class="top">
       <div class="brand">됴무실</div>
-      <div class="tag">
-        OFFICE STRESS BREAK · 오늘의 스트레스는 여기에 두고 가요
-      </div>
+      <div class="tag">OFFICE STRESS BREAK · 극강의 타격감 타임</div>
     </div>
     <div id="gauge">
       <span>😤 스트레스 <span id="pct">100</span>%</span> ·
@@ -462,42 +278,24 @@
       <div id="bar"><div id="fill"></div></div>
     </div>
     <div class="hud">
-      <button class="pill" id="rankBtn">🏆 랭크전</button
-      ><button class="pill" id="boardBtn">📊 랭킹</button>
-      <div class="pill" id="status">🏢 오피스 · 자유 행동</div>
-      <button class="pill tog" id="sound">🔇 효과음 OFF</button
-      ><button class="pill tog" id="bgm">🎵 배경음 OFF</button>
+      <div class="pill" id="status">🏢 오피스 · 액션 폭주 중</div>
     </div>
+    <div id="comboCount">1 COMBO!</div>
     <div class="help">
-      이동 <b>방향키</b><br />집기·던지기 <b>E</b> / 클릭
-      (책상·의자·화분도 OK)<br />발차기 <b>Space</b> · 주먹 <b>F</b><br />고함 <b>D</b> · 욕하기 <b>S</b> · 서류 폭죽 <b>A</b><br />벽을 계속 치면 금이 가다 무너져요<br />상사들은
-      가까이 가면 도망가요 — 쫓아가서 혼내주세요!<br />드래그로 시점 회전
+      이동 <b>방향키 / WASD</b><br />주먹 연타 <b>F</b> (콤보 연속기)<br />발차기 <b>Space</b> (강력한 회전 차기)<br />드래그로 마우스 시점 회전
     </div>
     <div id="actionbar">
-      <button class="action" id="pickupBtn">E 집기·던지기</button
-      ><button class="action" id="kickBtn">SPACE 발차기</button
-      ><button class="action" id="shoutBtn">D 고함</button
-      ><button class="action" id="curseBtn">S 🤬 욕하기</button
-      ><button class="action" id="punchBtn">F 주먹</button
-      ><button class="action" id="rainBtn">A 서류 폭죽</button>
+      <button class="action" id="punchBtn">👊 F 주먹 콤보</button>
+      <button class="action" id="kickBtn">👟 SPACE 회전 발차기</button>
     </div>
     <div id="mobile"><div id="stick"></div></div>
     <div id="mobileActions">
-      <button id="mPickup">✋<br />집기·던지기</button
-      ><button id="mKick">👟<br />발차기</button
-      ><button id="mShout">📢 D<br />고함</button
-      ><button id="mCurse">🤬 S<br />욕하기</button
-      ><button id="mPunch">👊<br />주먹</button
-      ><button id="mRain">🎉 A<br />서류 폭죽</button>
+      <button id="mPunch">👊<br />주먹</button>
+      <button id="mKick">👟<br />발차기</button>
     </div>
-    <div id="rkhud">
-      ⏱ <span id="rkTime">30.0</span><span>💥 <span id="rkScore">0</span></span>
-    </div>
-    <div id="cd"></div>
-    <div id="modal"></div>
     <div id="fx"></div>
     <div id="flash"></div>
-    <div id="toast"></div>
+
     <script type="importmap">
       {
         "imports": {
@@ -507,326 +305,348 @@
     </script>
     <script type="module">
       import * as THREE from "three";
-      const $ = (s) => document.querySelector(s),
-        R = Math.random,
-        V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
-      const MODE = "office";
+
+      const $ = (s) => document.querySelector(s);
       const scene = new THREE.Scene();
-      const BGC = 0x9eb4bd;
-      scene.background = new THREE.Color(BGC);
-      scene.fog = new THREE.Fog(BGC, 28, 66);
-      const camera = new THREE.PerspectiveCamera(
-        innerWidth < 700 ? 62 : 52,
-        innerWidth / innerHeight,
-        0.1,
-        120,
-      );
+      scene.background = new THREE.Color(0x8fa1aa);
+      scene.fog = new THREE.Fog(0x8fa1aa, 20, 50);
+
+      const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
       renderer.setSize(innerWidth, innerHeight);
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.12;
       $("#world").appendChild(renderer.domElement);
-      scene.add(new THREE.HemisphereLight(0xeaf4ff, 0x6e777c, 2.1));
-      const sun = new THREE.DirectionalLight(0xffedcf, 2.6);
-      sun.position.set(-8, 15, 10);
-      sun.castShadow = true;
-      sun.shadow.mapSize.set(2048, 2048);
-      Object.assign(sun.shadow.camera, {
-        left: -20,
-        right: 20,
-        top: 20,
-        bottom: -20,
-      });
-      scene.add(sun);
-      const mat = (c, r = 0.8, m = 0) =>
-        new THREE.MeshStandardMaterial({
-          color: c,
-          roughness: r,
-          metalness: m,
+
+      const light = new THREE.DirectionalLight(0xffeedd, 2.5);
+      light.position.set(-10, 20, 15);
+      light.castShadow = true;
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+
+      // ----------------------------------------------------
+      // 플레이어 및 관절(Rigging) 모델 구축
+      // ----------------------------------------------------
+      const playerGroup = new THREE.Group();
+      scene.add(playerGroup);
+
+      const skinMat = new THREE.MeshStandardMaterial({ color: 0xffcc99, roughness: 0.5 });
+      const suitMat = new THREE.MeshStandardMaterial({ color: 0x223344, roughness: 0.4 });
+      const shoeMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+      const trailMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.6 });
+
+      // 몸통
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.3), suitMat);
+      torso.position.y = 1.1;
+      playerGroup.add(torso);
+
+      // 머리
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), skinMat);
+      head.position.y = 0.6;
+      torso.add(head);
+
+      // 어깨 관절 & 오른팔 (주먹)
+      const rightShoulder = new THREE.Group();
+      rightShoulder.position.set(0.38, 0.3, 0);
+      torso.add(rightShoulder);
+
+      const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.5), suitMat);
+      rightArm.position.y = -0.25;
+      rightShoulder.add(rightArm);
+
+      const rightFist = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.2), skinMat);
+      rightFist.position.set(0, -0.28, 0.1);
+      rightArm.add(rightFist);
+
+      // 왼팔
+      const leftShoulder = new THREE.Group();
+      leftShoulder.position.set(-0.38, 0.3, 0);
+      torso.add(leftShoulder);
+
+      const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.5), suitMat);
+      leftArm.position.y = -0.25;
+      leftShoulder.add(leftArm);
+
+      const leftFist = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.2), skinMat);
+      leftFist.position.set(0, -0.28, 0.1);
+      leftArm.add(leftFist);
+
+      // 고관절 & 오른다리 (발차기)
+      const rightHip = new THREE.Group();
+      rightHip.position.set(0.18, -0.4, 0);
+      torso.add(rightHip);
+
+      const rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.08, 0.6), suitMat);
+      rightLeg.position.y = -0.3;
+      rightHip.add(rightLeg);
+
+      const rightFoot = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.12, 0.35), shoeMat);
+      rightFoot.position.set(0, -0.32, 0.1);
+      rightLeg.add(rightFoot);
+
+      // 왼다리
+      const leftHip = new THREE.Group();
+      leftHip.position.set(-0.18, -0.4, 0);
+      torso.add(leftHip);
+
+      const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.08, 0.6), suitMat);
+      leftLeg.position.y = -0.3;
+      leftHip.add(leftLeg);
+
+      // ----------------------------------------------------
+      // 사무실 파괴용 사물들
+      // ----------------------------------------------------
+      const targets = [];
+      function createTarget(x, z, name) {
+        const mesh = new THREE.Mesh(
+          new THREE.BoxGeometry(1, 1.2, 1),
+          new THREE.MeshStandardMaterial({ color: 0x8b5a2b })
+        );
+        mesh.position.set(x, 0.6, z);
+        mesh.castShadow = true;
+        mesh.userData = { name, hp: 100 };
+        scene.add(mesh);
+        targets.push(mesh);
+      }
+      createTarget(0, -2, "책상");
+      createTarget(-2, -1.5, "캐비닛");
+      createTarget(2, -1.5, "파티션");
+
+      // 바닥
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0xcccccc }));
+      floor.rotation.x = -Math.PI / 2;
+      scene.add(floor);
+
+      // ----------------------------------------------------
+      // 현란한 애니메이션 & 공격 시스템
+      // ----------------------------------------------------
+      let isAttacking = false;
+      let combo = 0;
+      let comboTimer = null;
+      let cameraShake = 0;
+
+      // 특수효과: 잔상 메쉬 궤적
+      function createSlashEffect(pos, scale = 1, isKick = false) {
+        const geo = isKick ? new THREE.TorusGeometry(0.8, 0.08, 8, 24, Math.PI) : new THREE.ConeGeometry(0.4, 1.2, 16);
+        const mat = new THREE.MeshBasicMaterial({
+          color: isKick ? 0xff3300 : 0xffaa00,
+          transparent: true,
+          opacity: 0.8
         });
-      const M = {
-        floor: mat(0x9ba7a6),
-        wall: mat(0xd9dedb),
-        blue: mat(0x607d8b),
-        navy: mat(0x263d50),
-        suit: mat(0x26394c),
-        shirt: mat(0xf3f0e7),
-        tie: mat(0xc0483c),
-        skin: mat(0xe6b994),
-        hair: mat(0x342d2b),
-        wood: mat(0x9a795c),
-        dark: mat(0x303b42),
-        screen: mat(0x5aa3b5, 0.3),
-        red: mat(0xb45c50),
-        green: mat(0x5e806b),
-        paper: mat(0xf1eee2),
-        metal: mat(0x68777d, 0.35, 0.45),
-        glass: mat(0x9dbdca, 0.3),
-      };
-      function box(p, x, y, z, sx, sy, sz, m) {
-        const o = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), m);
-        o.position.set(x, y, z);
-        o.castShadow = true;
-        o.receiveShadow = true;
-        p.add(o);
-        return o;
-      }
-      function cyl(p, x, y, z, rt, rb, h, m) {
-        const o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, 12), m);
-        o.position.set(x, y, z);
-        o.castShadow = true;
-        p.add(o);
-        return o;
-      }
-      let spots = [],
-        furn = [];
-      function loc(x, z, t, lx, lz) {
-        return [
-          x + lx * Math.cos(t) + lz * Math.sin(t),
-          z - lx * Math.sin(t) + lz * Math.cos(t),
-        ];
-      }
-      function buildOffice() {
-        // ---- office shell
-        box(scene, 0, -0.2, 0, 34, 0.4, 28, M.floor);
-        box(scene, 0, 4, -14, 34, 8, 0.35, M.wall);
-        box(scene, -17, 4, 0, 0.35, 8, 28, M.wall);
-        box(scene, 17, 4, 0, 0.35, 8, 28, M.wall);
-        for (const x of [-11, -5, 1, 7, 13])
-          box(scene, x, 4.1, -13.78, 4.7, 3.1, 0.08, M.glass);
-        box(scene, 0, 3.4, -13.7, 5, 2.1, 0.1, M.paper);
-        box(scene, 1, 0.95, -5, 8, 0.22, 2.5, M.wood);
-        for (const x of [-2, 0, 2, 4])
-          for (const z of [-7.1, -2.9])
-            box(scene, x, 0.55, z, 1.1, 0.75, 0.85, M.blue);
-        function workstation(x, z, t) {
-          const g = new THREE.Group();
-          g.position.set(x, 0, z);
-          g.rotation.y = t;
-          g.userData.label = "책상";
-          scene.add(g);
-          box(g, 0, 0.88, 0, 2.55, 0.16, 1.25, M.wood);
-          box(g, 0, 0.48, -0.52, 2.35, 0.62, 0.09, M.blue);
-          box(g, 0, 1.32, -0.98, 2.55, 0.72, 0.1, M.blue);
-          for (const dx of [-1.08, 1.08])
-            for (const dz of [-0.45, 0.45])
-              box(g, dx, 0.43, dz, 0.09, 0.84, 0.09, M.metal);
-          box(g, -1.0, 0.3, -0.15, 0.34, 0.58, 0.6, M.dark);
-          box(g, -1.0, 0.35, 0.16, 0.2, 0.04, 0.02, M.screen);
-          cyl(g, -0.72, 1.07, -0.42, 0.09, 0.1, 0.2, M.dark);
-          [M.red, M.blue, M.green, M.tie].forEach((m, i) => {
-            const pn = cyl(
-              g,
-              -0.74 + i * 0.04,
-              1.25,
-              -0.42,
-              0.012,
-              0.012,
-              0.26,
-              m,
-            );
-            pn.rotation.z = (i - 1.5) * 0.12;
-          });
-          box(g, 0.8, 1.0, -0.42, 0.3, 0.08, 0.22, M.dark);
-          box(g, 0.8, 1.045, -0.38, 0.18, 0.02, 0.1, M.screen);
-          [
-            [0.36, 1.36, 0xe7d58b],
-            [0.52, 1.28, 0xf2a3b3],
-            [0.3, 1.2, 0x9fd3a6],
-          ].forEach(([x, y, c]) => {
-            const n = box(g, x, y, -0.28, 0.11, 0.11, 0.01, mat(c));
-            n.rotation.z = (x - 0.4) * 1.5;
-          });
-          box(g, 0.62, 0.97, 0.14, 0.3, 0.012, 0.26, M.navy);
-          for (let n = 0; n < 3; n++) {
-            const sh = box(
-              g,
-              -0.1 + n * 0.16,
-              0.97,
-              0.5,
-              0.4,
-              0.012,
-              0.3,
-              M.paper,
-            );
-            sh.rotation.y = (n - 1) * 0.14;
+        const slash = new THREE.Mesh(geo, mat);
+        slash.position.copy(pos);
+        slash.rotation.x = Math.PI / 2;
+        slash.rotation.z = playerGroup.rotation.y + (isKick ? 0 : Math.PI / 2);
+        slash.scale.set(scale, scale, scale);
+        scene.add(slash);
+
+        let op = 0.8;
+        const fade = setInterval(() => {
+          op -= 0.1;
+          slash.scale.multiplyScalar(1.08);
+          slash.material.opacity = op;
+          if (op <= 0) {
+            scene.remove(slash);
+            clearInterval(fade);
           }
-          cyl(g, 1.1, 1.1, -0.42, 0.11, 0.12, 0.2, M.red);
-          cyl(g, 1.1, 1.28, -0.42, 0.06, 0.06, 0.22, M.green);
-          spots.push({ x, z, t });
-        }
-        [
-          [-6, -8, 0],
-          [0, -8, 0],
-          [6, -8, 0],
-          [-6, 5, Math.PI],
-          [0, 5, Math.PI],
-          [6, 5, Math.PI],
-          [-12, -1, 0],
-          [-6, -1, 0],
-          [0, -1, 0],
-          [6, -1, 0],
-          [12, -1, 0],
-          [-12, 9, Math.PI],
-          [-6, 9, Math.PI],
-          [0, 9, Math.PI],
-          [6, 9, Math.PI],
-          [12, 9, Math.PI],
-        ].forEach((a) => workstation(...a));
-        function plant(x, z) {
-          const G = new THREE.Group();
-          G.userData.label = "화분";
-          scene.add(G);
-          cyl(G, x, 0.45, z, 0.25, 0.34, 0.9, M.wood);
-          for (let i = 0; i < 7; i++) {
-            const a = (i * Math.PI * 2) / 7,
-              l = new THREE.Mesh(
-                new THREE.SphereGeometry(0.35, 10, 8),
-                M.green,
-              );
-            l.position.set(
-              x + Math.cos(a) * 0.35,
-              1.35 + (i % 2) * 0.15,
-              z + Math.sin(a) * 0.35,
-            );
-            l.scale.set(0.6, 1.5, 0.55);
-            G.add(l);
-          }
-        }
-        plant(-14, -11);
-        plant(14, -11);
-        plant(-14, 11);
-        plant(14, 11);
-        for (const z of [-4, 0])
-          for (const x of [-15, 15])
-            box(scene, x, 1, z, 1.05, 2, 0.85, M.metal);
-        const stripes = new THREE.Group();
-        stripes.userData.keep = true;
-        scene.add(stripes);
-        for (let i = -7; i < 7; i++)
-          box(
-            stripes,
-            0,
-            0.02,
-            i * 2 + 1,
-            34,
-            0.03,
-            1,
-            mat(i % 2 ? 0x94a2a1 : 0xa2aeac),
-          );
-        [
-          [-9, 4.6, 0xe4573d],
-          [9, 4.6, 0x4a8f8c],
-          [-14, 5, 0xf2a33a],
-        ].forEach(([x, y, c]) => {
-          box(scene, x, y, -13.72, 2, 2.7, 0.05, mat(c));
-          box(scene, x, y + 0.8, -13.69, 1.4, 0.2, 0.02, M.paper);
-          box(scene, x, y - 0.2, -13.69, 1.4, 0.1, 0.02, M.paper);
-        });
-        for (let i = 0; i < 5; i++)
-          box(
-            scene,
-            -0.4 - (i % 2) * 0.5,
-            3.95 - i * 0.3,
-            -13.6,
-            3 - (i % 2) * 0.8,
-            0.07,
-            0.02,
-            mat(i % 2 ? 0xc0483c : 0x2d4560),
-          );
-        box(scene, -13, 0.75, -9.6, 1.8, 1.5, 1.2, M.paper);
-        box(scene, -13, 1.55, -9.6, 0.9, 0.12, 0.8, M.dark);
-        box(scene, 13, 0.85, -9.6, 0.9, 1.7, 0.8, M.blue);
-        cyl(scene, 13, 2.0, -9.6, 0.3, 0.3, 0.7, mat(0x9fd3e6));
-        box(scene, 14.5, 0.5, 5, 1.4, 1, 1.8, M.wood);
-        box(scene, 14.5, 1.25, 5, 0.7, 0.5, 0.6, M.dark);
-        cyl(scene, 14.5, 1.1, 5.7, 0.12, 0.12, 0.2, M.paper);
-        for (const [x, z] of [
-          [-15, 3],
-          [15, -9],
-        ])
-          cyl(scene, x, 0.4, z, 0.3, 0.25, 0.8, M.dark);
+        }, 16);
       }
 
-      let structure = [];
-      function recenter(o) {
-        const c = new THREE.Box3().setFromObject(o).getCenter(V()),
-          w = new THREE.Group();
-        w.position.set(c.x, 0, c.z);
-        w.userData.label = o.userData.label;
-        scene.add(w);
-        w.attach(o);
-        return w;
+      // 화면 스파크 이펙트 (2D HTML UI)
+      function triggerHitFx(x, y, text) {
+        const pop = document.createElement("div");
+        pop.className = "pop";
+        pop.innerText = text;
+        pop.style.left = `${x}px`;
+        pop.style.top = `${y}px`;
+        $("#fx").appendChild(pop);
+        setTimeout(() => pop.remove(), 800);
       }
-      function finishFurn() {
-        scene.children
-          .filter((o) => o.isGroup && !o.userData.keep)
-          .forEach(recenter);
-        furn = scene.children
-          .filter((o) => (o.isMesh || o.isGroup) && !o.userData.keep)
-          .slice(4);
-        structure = furn.filter(
-          (o) => o.position.z < -13.3 || Math.abs(o.position.x) > 16.3,
-        );
-        furn.forEach((o) => {
-          o.userData.hp = o.position.clone();
-          o.userData.hr = o.rotation.clone();
+
+      // 카메라 쉐이크
+      function doShake(amount) {
+        cameraShake = amount;
+      }
+
+      function updateCombo() {
+        combo++;
+        const el = $("#comboCount");
+        el.innerText = `${combo} COMBO!`;
+        el.classList.add("active");
+        clearTimeout(comboTimer);
+        comboTimer = setTimeout(() => {
+          combo = 0;
+          el.classList.remove("active");
+        }, 1200);
+      }
+
+      // ----------------------------------------------------
+      // 주먹 공격 (F 키) : 3단 무술 콤보 모션
+      // ----------------------------------------------------
+      function doPunch() {
+        if (isAttacking) return;
+        isAttacking = true;
+        updateCombo();
+
+        const step = combo % 3;
+        const speed = 1.8;
+        let frame = 0;
+
+        const punchAnim = setInterval(() => {
+          frame++;
+          const progress = frame / 15;
+
+          if (step === 1) {
+            // 1타: 오른손 라이트 스트레이트 + 상체 비틀기
+            torso.rotation.y = -Math.sin(progress * Math.PI) * 0.6;
+            rightShoulder.rotation.x = -Math.sin(progress * Math.PI) * 1.5;
+            rightShoulder.position.z = Math.sin(progress * Math.PI) * 0.4;
+          } else if (step === 2) {
+            // 2타: 왼손 훅 + 앞으로 쏠리기
+            torso.rotation.y = Math.sin(progress * Math.PI) * 0.8;
+            leftShoulder.rotation.x = -Math.sin(progress * Math.PI) * 1.6;
+            leftShoulder.rotation.y = Math.sin(progress * Math.PI) * 0.8;
+          } else {
+            // 3타: 양손 강력한 양주먹 대형 찌르기
+            torso.rotation.x = Math.sin(progress * Math.PI) * 0.4;
+            rightShoulder.rotation.x = -Math.sin(progress * Math.PI) * 1.8;
+            leftShoulder.rotation.x = -Math.sin(progress * Math.PI) * 1.8;
+            playerGroup.position.z -= Math.sin(progress * Math.PI) * 0.08;
+          }
+
+          if (frame === 6) {
+            // 타격 시점
+            const fistWorldPos = new THREE.Vector3();
+            rightFist.getWorldPosition(fistWorldPos);
+            createSlashEffect(fistWorldPos, 1.2, false);
+            doShake(0.15);
+            checkImpact(fistWorldPos, 30);
+          }
+
+          if (frame >= 15) {
+            clearInterval(punchAnim);
+            // 원위치 복귀
+            torso.rotation.set(0, 0, 0);
+            rightShoulder.rotation.set(0, 0, 0);
+            leftShoulder.rotation.set(0, 0, 0);
+            rightShoulder.position.z = 0;
+            isAttacking = false;
+          }
+        }, 16 / speed);
+      }
+
+      // ----------------------------------------------------
+      // 발차기 공격 (Space 키) : 360도 공중 회전 돌려차기 모션
+      // ----------------------------------------------------
+      function doKick() {
+        if (isAttacking) return;
+        isAttacking = true;
+        updateCombo();
+
+        let frame = 0;
+        const kickAnim = setInterval(() => {
+          frame++;
+          const progress = frame / 20;
+
+          // 몸 전체가 360도 회전하며 발을 높게 차올림
+          playerGroup.rotation.y += (Math.PI * 2) / 20;
+          torso.rotation.x = -Math.sin(progress * Math.PI) * 0.3;
+          rightHip.rotation.x = -Math.sin(progress * Math.PI) * 2.2; // 다리 높이 들어올리기
+          rightHip.rotation.z = Math.sin(progress * Math.PI) * 0.5;
+
+          if (frame === 10) {
+            // 발차기 임팩트 지점
+            const footWorldPos = new THREE.Vector3();
+            rightFoot.getWorldPosition(footWorldPos);
+            createSlashEffect(footWorldPos, 2.0, true);
+            doShake(0.3);
+            checkImpact(footWorldPos, 60);
+          }
+
+          if (frame >= 20) {
+            clearInterval(kickAnim);
+            rightHip.rotation.set(0, 0, 0);
+            torso.rotation.x = 0;
+            playerGroup.rotation.y = Math.round(playerGroup.rotation.y / (Math.PI * 2)) * (Math.PI * 2);
+            isAttacking = false;
+          }
+        }, 16);
+      }
+
+      // 타격 판정 및 충격 효과 처리
+      function checkImpact(hitPos, damage) {
+        targets.forEach((t) => {
+          if (t.position.distanceTo(hitPos) < 1.8) {
+            t.userData.hp -= damage;
+            // 피격 사물 흔들림
+            t.position.x += (Math.random() - 0.5) * 0.3;
+            t.position.z += (Math.random() - 0.5) * 0.3;
+
+            // 팝업 이펙트
+            const screenPos = hitPos.clone().project(camera);
+            const x = (screenPos.x * 0.5 + 0.5) * innerWidth;
+            const y = (-(screenPos.y * 0.5) + 0.5) * innerHeight;
+            triggerHitFx(x, y, damage > 40 ? "💥 KICK!" : "👊 CRASH!");
+
+            if (t.userData.hp <= 0) {
+              scene.remove(t);
+            }
+          }
         });
       }
-      buildOffice();
-      finishFurn();
-      // ---- throwable props
-      const props = [];
-      const pcol = {
-        monitor: 0x4a6a77,
-        keyboard: 0x303b42,
-        mug: 0xd58d6d,
-        paper: 0xf1eee2,
-        chair: 0x607d8b,
-        mouse: 0x303b42,
-        tumbler: 0x527f83,
-        snack: 0xe4573d,
-        cushion: 0x7b5a4a,
-        sanitizer: 0xf4f2ec,
-        pot: 0xd9d2c5,
-      };
-      function prop(kind, x, y, z, ry, col) {
-        const g = new THREE.Group();
-        scene.add(g);
-        if (kind === "monitor") {
-          box(g, 0, 0.5, 0, 0.95, 0.62, 0.12, M.dark);
-          box(g, 0, 0.5, 0.07, 0.82, 0.5, 0.03, M.screen);
-          box(g, 0, 0.12, 0, 0.12, 0.25, 0.12, M.metal);
-          box(g, 0, 0.02, 0.04, 0.5, 0.06, 0.32, M.metal);
-        } else if (kind === "keyboard") {
-          box(g, 0, 0.04, 0, 0.8, 0.07, 0.28, M.dark);
-          box(g, 0, 0.085, 0, 0.7, 0.02, 0.2, M.paper);
-        } else if (kind === "mug") {
-          const m = mat(col || 0xd58d6d);
-          cyl(g, 0, 0.18, 0, 0.16, 0.14, 0.36, m);
-          const h = new THREE.Mesh(
-            new THREE.TorusGeometry(0.1, 0.03, 8, 12, Math.PI * 1.6),
-            m,
-          );
-          h.position.set(0.18, 0.18, 0);
-          g.add(h);
-        } else if (kind === "cushion") {
-          const b = box(g, 0, 0.24, 0, 0.62, 0.46, 0.16, mat(col || 0x7b5a4a));
-          b.rotation.x = -0.2;
-        } else if (kind === "sanitizer") {
-          cyl(g, 0, 0.2, 0, 0.09, 0.09, 0.4, M.paper);
-          cyl(g, 0, 0.44, 0, 0.03, 0.03, 0.1, M.blue);
-          box(g, 0.06, 0.5, 0, 0.14, 0.03, 0.05, M.blue);
-        } else if (kind === "pot") {
-          cyl(g, 0, 0.2, 0, 0.2, 0.15, 0.4, mat(0xd9d2c5));
-          for (let i = 0; i < 6; i++) {
-            const a = (i * Math.PI) / 3,
-              l = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), M.green);
-            l.position.set(
-              Math.cos(a) * 0.15,
-              0.62 + (i % 2) * 0.12,
-              Math.sin(a
+
+      // ----------------------------------------------------
+      // 키보드 & 클릭 조작 이벤트
+      // ----------------------------------------------------
+      window.addEventListener("keydown", (e) => {
+        if (e.code === "KeyF") doPunch();
+        if (e.code === "Space") doKick();
+      });
+
+      $("#punchBtn").addEventListener("click", doPunch);
+      $("#kickBtn").addEventListener("click", doKick);
+      $("#mPunch").addEventListener("click", doPunch);
+      $("#mKick").addEventListener("click", doKick);
+
+      // 카메라 조작용 마우스 변수
+      let isDragging = false, prevX = 0;
+      window.addEventListener("pointerdown", (e) => { isDragging = true; prevX = e.clientX; });
+      window.addEventListener("pointermove", (e) => {
+        if (isDragging) {
+          playerGroup.rotation.y -= (e.clientX - prevX) * 0.01;
+          prevX = e.clientX;
+        }
+      });
+      window.addEventListener("pointerup", () => isDragging = false);
+
+      // ----------------------------------------------------
+      // 메인 랜더링 루프
+      // ----------------------------------------------------
+      camera.position.set(0, 3.5, 4.5);
+      camera.lookAt(0, 1.2, 0);
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // 카메라 쉐이크 연출 적용
+        if (cameraShake > 0) {
+          camera.position.x = (Math.random() - 0.5) * cameraShake;
+          camera.position.y = 3.5 + (Math.random() - 0.5) * cameraShake;
+          cameraShake -= 0.015;
+        } else {
+          camera.position.set(0, 3.5, 4.5);
+        }
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener("resize", () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+      });
+    </script>
+  </body>
+</html>
