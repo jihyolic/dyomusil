@@ -12,7 +12,7 @@
       content="직장 스트레스를 게임 속에서 마음껏 해소하는 됴무실"
     />
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@500;700;800&display=swap";);
+      @import url("https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@500;700;800&display=swap");
       :root {
         --ink: #25313d;
         --glass: rgba(255, 255, 255, 0.9);
@@ -501,7 +501,7 @@
     <script type="importmap">
       {
         "imports": {
-          "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+          "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
         }
       }
     </script>
@@ -767,4 +767,66 @@
           .filter((o) => o.isGroup && !o.userData.keep)
           .forEach(recenter);
         furn = scene.children
-          .filter((o) => (o.isMesh || o.isGroup) && !o.userData
+          .filter((o) => (o.isMesh || o.isGroup) && !o.userData.keep)
+          .slice(4);
+        structure = furn.filter(
+          (o) => o.position.z < -13.3 || Math.abs(o.position.x) > 16.3,
+        );
+        furn.forEach((o) => {
+          o.userData.hp = o.position.clone();
+          o.userData.hr = o.rotation.clone();
+        });
+      }
+      buildOffice();
+      finishFurn();
+      // ---- throwable props
+      const props = [];
+      const pcol = {
+        monitor: 0x4a6a77,
+        keyboard: 0x303b42,
+        mug: 0xd58d6d,
+        paper: 0xf1eee2,
+        chair: 0x607d8b,
+        mouse: 0x303b42,
+        tumbler: 0x527f83,
+        snack: 0xe4573d,
+        cushion: 0x7b5a4a,
+        sanitizer: 0xf4f2ec,
+        pot: 0xd9d2c5,
+      };
+      function prop(kind, x, y, z, ry, col) {
+        const g = new THREE.Group();
+        scene.add(g);
+        if (kind === "monitor") {
+          box(g, 0, 0.5, 0, 0.95, 0.62, 0.12, M.dark);
+          box(g, 0, 0.5, 0.07, 0.82, 0.5, 0.03, M.screen);
+          box(g, 0, 0.12, 0, 0.12, 0.25, 0.12, M.metal);
+          box(g, 0, 0.02, 0.04, 0.5, 0.06, 0.32, M.metal);
+        } else if (kind === "keyboard") {
+          box(g, 0, 0.04, 0, 0.8, 0.07, 0.28, M.dark);
+          box(g, 0, 0.085, 0, 0.7, 0.02, 0.2, M.paper);
+        } else if (kind === "mug") {
+          const m = mat(col || 0xd58d6d);
+          cyl(g, 0, 0.18, 0, 0.16, 0.14, 0.36, m);
+          const h = new THREE.Mesh(
+            new THREE.TorusGeometry(0.1, 0.03, 8, 12, Math.PI * 1.6),
+            m,
+          );
+          h.position.set(0.18, 0.18, 0);
+          g.add(h);
+        } else if (kind === "cushion") {
+          const b = box(g, 0, 0.24, 0, 0.62, 0.46, 0.16, mat(col || 0x7b5a4a));
+          b.rotation.x = -0.2;
+        } else if (kind === "sanitizer") {
+          cyl(g, 0, 0.2, 0, 0.09, 0.09, 0.4, M.paper);
+          cyl(g, 0, 0.44, 0, 0.03, 0.03, 0.1, M.blue);
+          box(g, 0.06, 0.5, 0, 0.14, 0.03, 0.05, M.blue);
+        } else if (kind === "pot") {
+          cyl(g, 0, 0.2, 0, 0.2, 0.15, 0.4, mat(0xd9d2c5));
+          for (let i = 0; i < 6; i++) {
+            const a = (i * Math.PI) / 3,
+              l = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), M.green);
+            l.position.set(
+              Math.cos(a) * 0.15,
+              0.62 + (i % 2) * 0.12,
+              Math.sin(a
