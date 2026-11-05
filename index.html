@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>됴무실</title>
+<title>됴무실 — Office Stress Break</title>
 <meta name="description" content="직장 스트레스를 게임 속에서 마음껏 해소하는 됴무실">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@500;700;800&display=swap');
@@ -35,17 +35,28 @@ canvas{display:block;touch-action:none}
 @media(max-width:700px){.brand{font-size:21px}.tag{font-size:8px}.top{left:10px;top:8px}.hud{right:7px;top:7px}.pill{padding:6px 8px;font-size:9px}#gauge{left:10px;top:48px;width:150px}.help,#actionbar{display:none}#mobile{display:block}#mobileActions{display:flex}#status{max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pop{font-size:26px}}
 @media(max-width:700px){.hud{flex-wrap:wrap;justify-content:flex-end;max-width:64vw}}
 .tog{min-width:104px;background:#d9dedd;color:#6b7b82;border-color:#fff8}.tog.on{background:#2f9e6a;color:#fff;border-color:#2f9e6a;box-shadow:0 0 0 3px #2f9e6a33,0 5px 20px #172b3622}
+#rkhud{display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:5;gap:16px;align-items:center;background:#203541ee;color:#fff;border-radius:18px;padding:8px 20px;font-weight:800;font-size:22px;white-space:nowrap}
+#rkTime.warn{color:#ff7a6a}
+#cd{display:none;position:fixed;left:0;right:0;top:32%;z-index:35;text-align:center;font:400 110px 'Black Han Sans',sans-serif;color:#fff;-webkit-text-stroke:8px #c0392b;paint-order:stroke fill;pointer-events:none}
+#modal{display:none;position:fixed;inset:0;z-index:40;background:#10202a99;align-items:center;justify-content:center}
+.mb{background:#fff;border-radius:20px;padding:22px;width:min(92vw,380px);max-height:90vh;overflow:auto;text-align:center;box-shadow:0 20px 60px #0008;font-weight:700}
+.mb h2{margin:0 0 8px;font-size:22px}.mb p{margin:6px 0}.dim{color:#6b7b82;font-size:12px;font-weight:600}
+.mb input{width:100%;padding:11px;border:2px solid #cfd8d6;border-radius:12px;font:700 16px inherit;text-align:center;margin:8px 0}
+.big{font:400 52px 'Black Han Sans',sans-serif;color:#c0392b;margin:4px 0}
+.btns{display:flex;gap:8px;margin-top:12px}.btns button{flex:1;border:0;border-radius:12px;padding:12px;font:800 14px inherit;background:#2f9e6a;color:#fff;cursor:pointer}.btns button.sub{background:#d9dedd;color:#44545b}
+.bt{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}.bt td{padding:6px 8px;border-bottom:1px solid #eef1f0}.bt td:first-child{width:36px}.bt td:last-child{text-align:right;font-weight:800}.bt tr.me{background:#fff3c9}
 </style>
 </head>
 <body>
 <div id="world"></div>
 <div class="top"><div class="brand">됴무실</div><div class="tag">OFFICE STRESS BREAK · 오늘의 스트레스는 여기에 두고 가요</div></div>
 <div id="gauge"><span>😤 스트레스 <span id="pct">100</span>%</span> · <span>💥 파괴 <span id="score">0</span>/1000</span><div id="bar"><div id="fill"></div></div></div>
-<div class="hud"><div class="pill" id="status">🏢 오피스 · 자유 행동</div><button class="pill tog" id="sound">🔇 효과음 OFF</button><button class="pill tog" id="bgm">🎵 배경음 OFF</button></div>
+<div class="hud"><button class="pill" id="rankBtn">🏆 랭크전</button><button class="pill" id="boardBtn">📊 랭킹</button><div class="pill" id="status">🏢 오피스 · 자유 행동</div><button class="pill tog" id="sound">🔇 효과음 OFF</button><button class="pill tog" id="bgm">🎵 배경음 OFF</button></div>
 <div class="help">이동 <b>W A S D</b> / 방향키<br>집기·던지기 <b>E</b> / 클릭 (책상·의자·화분도 OK)<br>발차기 <b>Space</b> · 주먹 <b>F</b> · 고함 <b>Q</b><br>서류 폭죽 <b>R</b> · 벽을 계속 치면 금이 가다 무너져요<br>드래그로 시점 회전</div>
 <div id="actionbar"><button class="action" id="pickupBtn">E 집기·던지기</button><button class="action" id="kickBtn">SPACE 발차기</button><button class="action" id="shoutBtn">Q 소리 지르기</button><button class="action" id="punchBtn">F 주먹</button><button class="action" id="rainBtn">R 서류 폭죽</button></div>
 <div id="mobile"><div id="stick"></div></div>
 <div id="mobileActions"><button id="mPickup">✋<br>집기·던지기</button><button id="mKick">👟<br>발차기</button><button id="mShout">📢<br>고함</button><button id="mPunch">👊<br>주먹</button><button id="mRain">🎉<br>서류 폭죽</button></div>
+<div id="rkhud">⏱ <span id="rkTime">60.0</span><span>💥 <span id="rkScore">0</span></span></div><div id="cd"></div><div id="modal"></div>
 <div id="fx"></div><div id="flash"></div><div id="toast"></div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
 <script type="module">
@@ -168,7 +179,7 @@ const keys={};let soundOn=false,audio=null;
 function toast(s){const el=$('#toast');el.textContent=s;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1700)}
 function pop(txt,pos,col){const v=pos.clone().project(camera);if(v.z>1)return;const d=document.createElement('div');d.className='pop';d.textContent=txt;d.style.left=(v.x*.5+.5)*innerWidth+'px';d.style.top=(-v.y*.5+.5)*innerHeight+'px';if(col)d.style.webkitTextStrokeColor=col;$('#fx').appendChild(d);setTimeout(()=>d.remove(),900)}
 function flash(a=.5){const f=$('#flash');f.style.transition='none';f.style.opacity=a;requestAnimationFrame(()=>{f.style.transition='opacity .35s';f.style.opacity=0})}
-function relieve(n){if(boom)return;const was=score;score=Math.min(1000,score+Math.max(1,Math.round(n*3)));stress=100-score/10;$('#pct').textContent=Math.round(stress);$('#score').textContent=score;$('#fill').style.width=score/10+'%';if(was<900&&score>=900)toast('⚠️ 폭발 임박! 조금만 더!');if(score>=1000)megaBoom()}
+function relieve(n){if(RK.state==='play'){RK.score+=Math.max(1,Math.round(n*3));updRank()}if(boom)return;const was=score;score=Math.min(1000,score+Math.max(1,Math.round(n*3)));stress=100-score/10;$('#pct').textContent=Math.round(stress);$('#score').textContent=score;$('#fill').style.width=score/10+'%';if(was<900&&score>=900)toast('⚠️ 폭발 임박! 조금만 더!');if(score>=1000)megaBoom()}
 function initAudio(){if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume()}
 function tone(f,d=.12,type='sine',g=.08,slide=0){if(!soundOn)return;initAudio();const o=audio.createOscillator(),n=audio.createGain(),t=audio.currentTime;o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);n.gain.setValueAtTime(g,t);n.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(n).connect(audio.destination);o.start();o.stop(t+d)}
 function noise(d=.2,g=.08){if(!soundOn)return;initAudio();const n=Math.floor(audio.sampleRate*d),b=audio.createBuffer(1,n,audio.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(R()*2-1)*(1-i/n);const s=audio.createBufferSource(),v=audio.createGain();s.buffer=b;v.gain.value=g;s.connect(v).connect(audio.destination);s.start()}
@@ -210,7 +221,7 @@ function shout(){sfx.shout();toast('아아아아악!!! 오늘 스트레스 여�
   const t0=performance.now();(function f(){const t=(performance.now()-t0)/700;ring.scale.setScalar(1+t*14);ring.material.opacity=Math.max(0,.9-t);t<1?requestAnimationFrame(f):(scene.remove(ring),ring.geometry.dispose(),ring.material.dispose())})();relieve(8)}
 function paperStorm(){rain(70);toast('서류 폭죽 발사!!');pop('와르르~',avatar.position.clone().add(V(0,3,0)));sfx.throw();relieve(3)}
 const fires=[],boomLight=new THREE.PointLight(0xff7a1a,0,70,1.4);boomLight.position.set(0,6,0);scene.add(boomLight);
-function megaBoom(){boom=true;if(held)throwHeld();toast('🚨 파괴 게이지 MAX! 사무실 폭발 3초 전!!');sfx.riser();sfx.alarm();
+function megaBoom(){boom=true;if(RK.state==='play'){RK.score+=500;updRank();setTimeout(()=>toast('💥 폭발 보너스 +500!'),1200)}if(held)throwHeld();toast('🚨 파괴 게이지 MAX! 사무실 폭발 3초 전!!');sfx.riser();sfx.alarm();
   ['3','2','1'].forEach((n,i)=>setTimeout(()=>{pop(n,avatar.position.clone().add(V(0,3.5,0)),'#7a1f1f');shake=.5+i*.4;flash(.25)},i*900));setTimeout(explode,2700)}
 function explode(){flash(1);sfx.boom();walls.forEach(w=>{if(!w.broken){w.broken=true;w.m.visible=false;w.cr.forEach(c=>crackG.remove(c));w.cr=[];setTimeout(()=>{w.broken=false;w.hp=0;w.m.visible=true;w.m.material.color.copy(w.base)},10600)}});shake=3;boomLight.intensity=900;
   for(let i=0;i<22;i++){const m=new THREE.Mesh(SG,new THREE.MeshBasicMaterial({color:[0xff8a1f,0xffd36c,0xff4d1f][i%3],transparent:true,opacity:.9}));m.position.set((R()-.5)*30,.5+R()*4,(R()-.5)*22);m.scale.setScalar(.3);m.visible=false;m.userData={life:1.2+R()*.8,max:2.5+R()*3.5,t:0,delay:R()*.5};scene.add(m);fires.push(m)}
@@ -219,7 +230,7 @@ function explode(){flash(1);sfx.boom();walls.forEach(w=>{if(!w.broken){w.broken=
   for(const n of npcs)knock(n,n.position.clone().setY(0).normalize().add(V(R()-.5,0,R()-.5)),16,'으아아악!!!');
   burst(V(0,2,0),0xffb347,60,18);rain(120);pop('콰콰쾅!!!',V(0,3,0),'#7a1f1f');
   setTimeout(()=>{for(const o of furn){const d=o.userData;d.fly=false;o.position.copy(d.hp);o.rotation.copy(d.hr)}score=0;stress=100;$('#score').textContent=0;$('#pct').textContent=100;$('#fill').style.width='0%';boom=false;toast('🧹 사무실 복구 완료! 다시 스트레스를 풀어보세요');flash(.6)},10500)}
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(!keys[k]){if(k==='e')pickup();if(k===' ')kick();if(k==='q')shout();if(k==='r')paperStorm();if(k==='f')punch()}keys[k]=true});
+addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT')return;const k=e.key.toLowerCase();if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(!keys[k]){if(k==='e')pickup();if(k===' ')kick();if(k==='q')shout();if(k==='r')paperStorm();if(k==='f')punch()}keys[k]=true});
 addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 // joystick
 const joyEl=$('#mobile'),stick=$('#stick'),joy={x:0,y:0,id:null};
@@ -267,6 +278,37 @@ function punch(){const f=fwd();let hit=false;actionUntil=performance.now()+260;a
   const r=wallInReach();if(r){hitWall(r,false);hit=true}
   sfx.kick();if(hit){shake=Math.max(shake,.2);relieve(2)}else toast('휙! 허공에 주먹질')}
 registerFurn();initWalls();
+// ---- ranked mode (60s) + leaderboard
+const RK={state:'idle',end:0,score:0};let myName='';try{myName=localStorage.getItem('dmoo_name')||''}catch(e){}
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),fmt=n=>Number(n).toLocaleString('ko-KR');
+function updRank(){$('#rkScore').textContent=fmt(RK.score)}
+function rankTick(now){if(RK.state!=='play')return;const left=Math.max(0,RK.end-now);$('#rkTime').textContent=(left/1000).toFixed(1);$('#rkTime').classList.toggle('warn',left<10000);if(left<=0)finishRank()}
+function showModal(h){const m=$('#modal');m.innerHTML='<div class="mb">'+h+'</div>';m.style.display='flex'}
+function closeModal(){$('#modal').style.display='none'}
+async function api(method,body){const r=await fetch('/api/scores',{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});if(!r.ok)throw new Error(r.status);return r.json()}
+function localBoard(){try{return JSON.parse(localStorage.getItem('dmoo_board')||'[]')}catch(e){return[]}}
+async function submitScore(n,sc){try{const r=await api('POST',{name:n,score:sc});return{...r,shared:true}}catch(e){const b=localBoard(),i=b.findIndex(x=>x.n===n);if(i<0)b.push({n,s:sc});else if(sc>b[i].s)b[i].s=sc;b.sort((x,y)=>y.s-x.s);try{localStorage.setItem('dmoo_board',JSON.stringify(b.slice(0,50)))}catch(_){}const j=b.findIndex(x=>x.n===n);return{shared:false,board:b.slice(0,10),rank:j+1,best:b[j].s}}}
+async function getBoard(){try{const r=await api('GET');return{shared:true,board:r.board}}catch(e){return{shared:false,board:localBoard().slice(0,10)}}}
+function boardHTML(b,me){if(!b.length)return '<p class="dim">아직 기록이 없어요. 첫 번째 주인공이 되어보세요!</p>';return '<table class="bt">'+b.map((x,i)=>`<tr class="${x.n===me?'me':''}"><td>${['🥇','🥈','🥉'][i]||i+1}</td><td>${esc(x.n)}</td><td>${fmt(x.s)}</td></tr>`).join('')+'</table>'}
+const noteH=sh=>sh?'':'<p class="dim">⚠ 공용 서버 미연결 — 이 브라우저에만 저장돼요</p>';
+async function openBoard(){showModal('<h2>🏆 랭킹</h2><p class="dim">불러오는 중...</p>');const r=await getBoard();showModal('<h2>🏆 랭킹 TOP 10</h2>'+boardHTML(r.board,myName)+noteH(r.shared)+'<div class="btns"><button data-act="intro">랭크전 도전</button><button data-act="close" class="sub">닫기</button></div>')}
+function openIntro(){if(RK.state==='play'||RK.state==='count')return;showModal(`<h2>🏆 랭크전</h2><p>제한시간 <b>60초</b> 동안<br>폭발지수를 최대한 올려보세요!<br><span class="dim">물건 부수기·동료 날리기·벽 부수기·폭발 보너스 모두 점수!<br>이름별 최고 기록이 랭킹에 남아요.</span></p><input id="nm" maxlength="10" placeholder="이름 (최대 10자)" value="${esc(myName)}"><div class="btns"><button data-act="start">시작!</button><button data-act="close" class="sub">취소</button></div>`);setTimeout(()=>{const i=$('#nm');if(i&&i.focus)i.focus()},50)}
+function doStart(){const v=(($('#nm')||{}).value||myName||'').trim();if(!v)return toast('이름을 입력해 주세요');if(boom)return toast('폭발 복구 중이에요. 잠시 후 시작해 주세요');startRank(v)}
+function resetWorld(){if(held){held.userData.held=false;held=null}
+  for(const p of props){const d=p.userData;d.held=false;d.dead=false;d.v.set(0,0,0);d.spin.set(0,0,0);p.visible=true;p.position.copy(d.home);if(d.hr)p.rotation.copy(d.hr);else p.rotation.set(0,d.homeR||0,0)}
+  for(const o of furn){const d=o.userData;d.fly=false;if(d.hp){o.position.copy(d.hp);o.rotation.copy(d.hr)}}
+  for(const n of npcs){const d=n.userData;d.v.set(0,0,0);d.down=0;n.position.copy(d.home);n.rotation.set(0,d.ry,0)}
+  for(const w of walls){w.broken=false;w.hp=0;w.m.visible=true;w.parts.forEach(o=>o.visible=true);w.m.material.color.copy(w.base);w.cr.forEach(c=>crackG.remove(c));w.cr=[]}
+  score=0;stress=100;$('#score').textContent=0;$('#pct').textContent=100;$('#fill').style.width='0%';avatar.position.set(0,0,2)}
+function startRank(name){myName=name;try{localStorage.setItem('dmoo_name',name)}catch(e){}closeModal();resetWorld();RK.state='count';RK.score=0;updRank();$('#rkhud').style.display='flex';$('#rkTime').textContent='60.0';
+  const cd=$('#cd');cd.style.display='block';[3,2,1,'START!'].forEach((t,i)=>setTimeout(()=>{cd.textContent=t;ts(i<3?660:1000,.15,{type:'square',g:.1,wet:.1});if(i===3){RK.state='play';RK.end=performance.now()+60000;setTimeout(()=>{cd.style.display='none'},700)}},i*900))}
+async function finishRank(){RK.state='over';$('#rkhud').style.display='none';sfx.alarm();flash(.5);const sc=RK.score;
+  showModal(`<h2>⏰ TIME UP!</h2><div class="big">${fmt(sc)}</div><p class="dim">기록 저장 중...</p>`);
+  const r=await submitScore(myName,sc);
+  showModal(`<h2>⏰ TIME UP!</h2><div class="big">💥 ${fmt(sc)}</div><p>${esc(myName)}님 현재 <b>${r.rank}위</b>${r.best>sc?' <span class="dim">(내 최고 '+fmt(r.best)+')</span>':''}</p>`+boardHTML(r.board,myName)+noteH(r.shared)+'<div class="btns"><button data-act="again">다시 도전</button><button data-act="close" class="sub">닫기</button></div>')}
+$('#modal').addEventListener('click',e=>{const a=e.target&&e.target.dataset&&e.target.dataset.act;if(a==='start')doStart();else if(a==='again')doStart();else if(a==='intro')openIntro();else if(a==='close'){closeModal();if(RK.state==='over')RK.state='idle'}});
+$('#modal').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='nm')doStart()});
+$('#rankBtn').onclick=openIntro;$('#boardBtn').onclick=openBoard;
 const clock=new THREE.Clock(),look=V();
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04),now=performance.now();let moving=false;
   const f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-joy.y,sd=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+joy.x;
@@ -294,6 +336,7 @@ function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDel
   for(const o of furn){const d=o.userData;if(!d.fly)continue;o.position.addScaledVector(d.fv,dt);d.fv.y-=16*dt;o.rotation.x+=d.fs.x*dt;o.rotation.y+=d.fs.y*dt;o.rotation.z+=d.fs.z*dt;const fl=d.hp.y>1?.3:0;if(o.position.y<fl){o.position.y=fl;d.fv.y=Math.abs(d.fv.y)*.3;d.fv.x*=.7;d.fv.z*=.7;d.fs.multiplyScalar(.7);if(d.fv.lengthSq()<.6){d.fv.set(0,0,0);d.fs.set(0,0,0)}}o.position.x=THREE.MathUtils.clamp(o.position.x,-16.5,16.5);o.position.z=THREE.MathUtils.clamp(o.position.z,-13,13)}
   for(let i=fires.length-1;i>=0;i--){const m=fires[i],d=m.userData;d.t+=dt;if(d.t<d.delay)continue;m.visible=true;const k=(d.t-d.delay)/d.life;m.scale.setScalar(.3+d.max*Math.min(1,k));m.material.opacity=Math.max(0,.9*(1-k));m.position.y+=dt*1.5;if(k>=1){scene.remove(m);m.material.dispose();fires.splice(i,1)}}
   boomLight.intensity=Math.max(0,boomLight.intensity-dt*500);
+  rankTick(now);
   const near=nearest();$('#status').textContent=held?'✋ '+held.userData.name+' 들고 있음 · 클릭으로 던지기':near?'E · '+near.userData.name+' 집기':'🏢 오피스 · 자유 행동';
   look.set(avatar.position.x,1.2,avatar.position.z);
   const dist=10.5,h=Math.cos(cameraPitch)*dist,want=V(avatar.position.x+Math.sin(cameraYaw)*h,Math.sin(cameraPitch)*dist+1,avatar.position.z+Math.cos(cameraYaw)*h);
