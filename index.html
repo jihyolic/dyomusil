@@ -461,8 +461,8 @@
     <div class="help">
       이동 <b>W A S D</b> / 방향키<br />집기·던지기 <b>E</b> / 클릭
       (책상·의자·화분도 OK)<br />발차기 <b>Space</b> · 주먹 <b>F</b> · 고함
-      <b>Q</b><br />서류 폭죽 <b>R</b> · 벽을 계속 치면 금이 가다 무너져요<br />드래그로
-      시점 회전
+      <b>Q</b><br />서류 폭죽 <b>R</b> · 벽을 계속 치면 금이 가다 무너져요<br />상사들은
+      가까이 가면 도망가요 — 쫓아가서 혼내주세요!<br />드래그로 시점 회전
     </div>
     <div id="actionbar">
       <button class="action" id="pickupBtn">E 집기·던지기</button
@@ -480,7 +480,7 @@
       ><button id="mRain">🎉<br />서류 폭죽</button>
     </div>
     <div id="rkhud">
-      ⏱ <span id="rkTime">60.0</span><span>💥 <span id="rkScore">0</span></span>
+      ⏱ <span id="rkTime">30.0</span><span>💥 <span id="rkScore">0</span></span>
     </div>
     <div id="cd"></div>
     <div id="modal"></div>
@@ -945,11 +945,135 @@
         if (mo) mo.scale.set(1, m === "normal" ? 1 : m === "hurt" ? 3 : 6, 1);
       }
       const npcs = [];
-      function npc(x, z, ry, shirt) {
-        const g = new THREE.Group();
+      const BOSS = [
+        {
+          tag: "꼰대 부장",
+          suit: 0x5b5f66,
+          hair: 0xbdbdbd,
+          skin: 0xe6b994,
+          belly: 1,
+          glasses: 1,
+          tie: 0x2f6f5a,
+          lines: [
+            "나 때는 말이야!",
+            "요즘 애들은 말이야~",
+            "이게 다 너 잘되라고!",
+            "내가 해봐서 아는데!",
+          ],
+        },
+        {
+          tag: "갑질 이사",
+          suit: 0x15151c,
+          hair: 0x111111,
+          skin: 0xe6b994,
+          shades: 1,
+          tie: 0xb02a2a,
+          lines: [
+            "내가 누군지 알아?!",
+            "당장 보고서 가져와!",
+            "이걸 왜 안 했어?!",
+            "다 갈아엎어!",
+          ],
+        },
+        {
+          tag: "라떼 팀장",
+          suit: 0x6a5648,
+          hair: 0x6b4a2f,
+          skin: 0xe9bf9d,
+          mug: 1,
+          tie: 0xd9a441,
+          lines: [
+            "라떼는 새벽 퇴근!",
+            "커피 좀 타와~",
+            "라떼는 말이야~",
+            "우리 땐 주말도 출근!",
+          ],
+        },
+        {
+          tag: "야근 과장",
+          suit: 0x2d4560,
+          hair: 0x2a2a2a,
+          skin: 0xe6b994,
+          glasses: 1,
+          tie: 0x7a3a8a,
+          lines: [
+            "퇴근하려고?",
+            "오늘 야근 좀 하지?",
+            "주말에 잠깐 나와~",
+            "칼퇴가 말이 돼?",
+          ],
+        },
+        {
+          tag: "회식 상무",
+          suit: 0x7a3b3b,
+          hair: 0x3a3a3a,
+          skin: 0xe39a86,
+          belly: 1,
+          tie: 0xf0c040,
+          lines: ["한잔 하자!", "2차 가야지~", "회식 불참이야?", "원샷!!"],
+        },
+        {
+          tag: "감시 차장",
+          suit: 0x3c4a56,
+          hair: 0x2b2423,
+          skin: 0xe6b994,
+          clip: 1,
+          glasses: 1,
+          tie: 0x888888,
+          lines: [
+            "진행상황 보고!",
+            "지금 뭐해?",
+            "카톡 왜 안 읽어?",
+            "왜 아직도 안 했어?",
+          ],
+        },
+      ];
+      function tagSprite(t) {
+        const cv = document.createElement("canvas");
+        cv.width = 320;
+        cv.height = 80;
+        const g = cv.getContext("2d");
+        g.fillStyle = "#c0392b";
+        g.beginPath();
+        g.roundRect ? g.roundRect(4, 4, 312, 72, 24) : g.rect(4, 4, 312, 72);
+        g.fill();
+        g.fillStyle = "#fff";
+        g.font = '800 40px "Noto Sans KR","Malgun Gothic",sans-serif';
+        g.textAlign = "center";
+        g.fillText(t, 160, 54);
+        const tx = new THREE.CanvasTexture(cv);
+        tx.colorSpace = THREE.SRGBColorSpace;
+        const sp = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: tx,
+            transparent: true,
+            depthTest: false,
+          }),
+        );
+        sp.scale.set(2.2, 0.55, 1);
+        sp.position.y = 2.6;
+        sp.renderOrder = 5;
+        return sp;
+      }
+      function npc(x, z, ry, type) {
+        const B = BOSS[type % BOSS.length],
+          g = new THREE.Group(),
+          suit = mat(B.suit),
+          skin = mat(B.skin);
         scene.add(g);
-        box(g, 0, 1.0, 0, 0.66, 0.8, 0.4, mat(shirt));
-        const h = new THREE.Mesh(new THREE.SphereGeometry(0.3, 14, 12), M.skin);
+        box(g, 0, 1.0, 0, 0.66, 0.8, 0.4, suit);
+        if (B.belly) {
+          const b = new THREE.Mesh(
+            new THREE.SphereGeometry(0.34, 12, 10),
+            suit,
+          );
+          b.position.set(0, 0.85, 0.2);
+          b.scale.set(1.15, 1, 0.8);
+          b.castShadow = true;
+          g.add(b);
+        }
+        box(g, 0, 1.2, B.belly ? 0.4 : 0.21, 0.13, 0.42, 0.03, mat(B.tie));
+        const h = new THREE.Mesh(new THREE.SphereGeometry(0.3, 14, 12), skin);
         h.position.set(0, 1.7, 0);
         h.castShadow = true;
         g.add(h);
@@ -963,23 +1087,47 @@
             0,
             Math.PI * 0.55,
           ),
-          mat([0x342d2b, 0x6b4a2f, 0x1d1d1f][(R() * 3) | 0]),
+          mat(B.hair),
         );
         hr.position.set(0, 1.78, -0.02);
         g.add(hr);
-        for (const s of [-0.15, 0.15]) {
+        for (const sd of [-0.13, 0.13]) {
           const e = new THREE.Mesh(
             new THREE.SphereGeometry(0.03, 8, 8),
             M.dark,
           );
-          e.position.set(s, 1.72, 0.27);
+          e.position.set(sd, 1.71, 0.27);
           g.add(e);
+          const br = box(g, sd, 1.8, 0.27, 0.15, 0.035, 0.03, M.dark);
+          br.rotation.z = sd < 0 ? -0.45 : 0.45;
+          if (B.glasses) {
+            const r = new THREE.Mesh(
+              new THREE.TorusGeometry(0.075, 0.014, 6, 14),
+              M.dark,
+            );
+            r.position.set(sd, 1.71, 0.285);
+            g.add(r);
+          }
         }
-        const mo = box(g, 0, 1.6, 0.29, 0.1, 0.03, 0.03, M.dark);
-        for (const s of [-0.42, 0.42])
-          box(g, s, 1.0, 0.05, 0.18, 0.65, 0.2, mat(shirt));
-        for (const s of [-0.17, 0.17])
-          box(g, s, 0.35, 0, 0.24, 0.62, 0.3, M.navy);
+        if (B.glasses) box(g, 0, 1.72, 0.29, 0.06, 0.015, 0.015, M.dark);
+        if (B.shades) box(g, 0, 1.71, 0.29, 0.46, 0.1, 0.05, M.dark);
+        const mo = box(g, 0, 1.58, 0.29, 0.12, 0.03, 0.03, M.dark);
+        const ar = [];
+        for (const sd of [-0.42, 0.42])
+          ar.push(box(g, sd, 1.0, 0.05, 0.18, 0.65, 0.2, suit));
+        if (B.mug) {
+          const m = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.08, 0.07, 0.16, 10),
+            mat(0xe8a24a),
+          );
+          m.position.set(0.42, 0.7, 0.2);
+          g.add(m);
+        }
+        if (B.clip) box(g, -0.42, 0.75, 0.2, 0.2, 0.26, 0.03, M.paper);
+        const lg = [];
+        for (const sd of [-0.17, 0.17])
+          lg.push(box(g, sd, 0.35, 0, 0.24, 0.62, 0.3, M.navy));
+        g.add(tagSprite(B.tag));
         g.position.set(x, 0, z);
         g.rotation.y = ry;
         g.userData = {
@@ -988,25 +1136,29 @@
           home: V(x, 0, z),
           ry,
           ph: R() * 6,
-          name: "동료",
+          name: B.tag,
+          lines: B.lines,
           mouth: mo,
+          legs: lg,
+          arms: ar,
         };
         npcs.push(g);
         return g;
       }
+      spots.forEach((sp, i) => {
+        const p = loc(sp.x, sp.z, sp.t, 0, 1.05);
+        npc(p[0], p[1], sp.t + Math.PI, i);
+      });
       [
-        [-6, -6.95, Math.PI, 0x8aa5b3],
-        [0, -6.95, Math.PI, 0xc9a98e],
-        [6, -6.95, Math.PI, 0x9dbb9a],
-        [-6, 3.95, 0, 0xd1c1d8],
-        [0, 3.95, 0, 0xe0b9a3],
-        [6, 3.95, 0, 0x93a7c9],
-        [-12, -2.95, Math.PI, 0xc7d1a0],
-        [0, -2.95, Math.PI, 0xb7c4c9],
-        [12, -2.95, Math.PI, 0xe5cf9c],
-        [-6, 7.95, 0, 0xc3a3a3],
-        [12, 7.95, 0, 0xa3c3b7],
-      ].forEach((a) => npc(...a));
+        [-13, -8.2, 0],
+        [13, -8.2, 0],
+        [-9, -11.8, 0],
+        [9, -11.8, 0],
+        [-9.5, 7, Math.PI],
+        [9.5, 7, Math.PI],
+        [3, 11, Math.PI],
+        [-3, 11, Math.PI],
+      ].forEach((a, i) => npc(a[0], a[1], a[2], i + 2));
       // ---- player
       const avatar = new THREE.Group();
       scene.add(avatar);
@@ -1497,13 +1649,93 @@
         d.v.copy(dir).multiplyScalar(power);
         d.v.y = power * 0.45;
         d.down = performance.now() + 2600;
-        pop(txt || "으악!!", n.position.clone().add(V(0, 2.4, 0)), "#2d6a8a");
+        pop(
+          d.lines && R() < 0.75
+            ? d.lines[(R() * d.lines.length) | 0]
+            : txt || "으악!!",
+          n.position.clone().add(V(0, 2.9, 0)),
+          "#2d6a8a",
+        );
         sfx.hit();
         relieve(4);
         shake = Math.max(shake, 0.3);
       }
       const fwd = () =>
         V(Math.sin(avatar.rotation.y), 0, Math.cos(avatar.rotation.y));
+      const FLEE = [
+        "히익!",
+        "오지마!!",
+        "인사팀 부를 거야!",
+        "살려줘!",
+        "왜 이래?!",
+      ];
+      function npcAI(n, d, now, dt) {
+        n.position.y = 0;
+        const dx = n.position.x - avatar.position.x,
+          dz = n.position.z - avatar.position.z,
+          dist = Math.hypot(dx, dz) || 1;
+        let sp = 0,
+          mx = 0,
+          mz = 0;
+        d.flee = false;
+        if (dist < 5.5) {
+          d.flee = true;
+          d.side = d.side || (R() < 0.5 ? -1 : 1);
+          mx = dx / dist - (dz / dist) * 0.45 * d.side;
+          mz = dz / dist + (dx / dist) * 0.45 * d.side;
+          sp = 3.6;
+          if (dist < 3 && now > (d.say || 0) && R() < 0.04) {
+            d.say = now + 3500;
+            pop(
+              FLEE[(R() * FLEE.length) | 0],
+              n.position.clone().add(V(0, 2.9, 0)),
+              "#2d6a8a",
+            );
+          }
+        } else {
+          if (
+            !d.tgt ||
+            now > d.tgtT ||
+            Math.hypot(n.position.x - d.tgt.x, n.position.z - d.tgt.z) < 0.5
+          ) {
+            d.tgt = V((R() - 0.5) * 30, 0, (R() - 0.5) * 22);
+            d.tgtT = now + 5000 + R() * 5000;
+            d.idle = now + (R() < 0.4 ? 1500 + R() * 3000 : 0);
+          }
+          if (now > (d.idle || 0)) {
+            mx = d.tgt.x - n.position.x;
+            mz = d.tgt.z - n.position.z;
+            sp = 1.4;
+          }
+        }
+        const L = d.legs,
+          A = d.arms;
+        if (sp) {
+          const l = Math.hypot(mx, mz) || 1;
+          mx /= l;
+          mz /= l;
+          n.position.x = THREE.MathUtils.clamp(
+            n.position.x + mx * sp * dt,
+            -16,
+            16,
+          );
+          n.position.z = THREE.MathUtils.clamp(
+            n.position.z + mz * sp * dt,
+            -12.5,
+            12.5,
+          );
+          n.rotation.y = Math.atan2(mx, mz);
+          const t = now * (sp > 3 ? 0.018 : 0.009) + d.ph;
+          L[0].rotation.x = Math.sin(t) * 0.6;
+          L[1].rotation.x = -Math.sin(t) * 0.6;
+          A[0].rotation.x = -Math.sin(t) * 0.4;
+          A[1].rotation.x = Math.sin(t) * 0.4;
+          n.position.y = Math.abs(Math.sin(t)) * 0.05;
+        } else {
+          L.forEach((x) => (x.rotation.x = 0));
+          A.forEach((x) => (x.rotation.x = 0));
+        }
+      }
       function furnK(d) {
         return d.vol ? 1 / (1 + d.vol * 0.12) : 1;
       }
@@ -2137,7 +2369,7 @@
         if (RK.state !== "play") return;
         const left = Math.max(0, RK.end - now);
         $("#rkTime").textContent = (left / 1000).toFixed(1);
-        $("#rkTime").classList.toggle("warn", left < 10000);
+        $("#rkTime").classList.toggle("warn", left < 5000);
         if (left <= 0) finishRank();
       }
       function showModal(h) {
@@ -2260,7 +2492,7 @@
       function openIntro() {
         if (RK.state === "play" || RK.state === "count") return;
         showModal(
-          `<h2>🏆 랭크전</h2><p>제한시간 <b>60초</b> 동안<br>폭발지수를 최대한 올려보세요!<br><span class="dim">물건 부수기·동료 날리기·벽 부수기·폭발 보너스 모두 점수!<br>이름별 최고 기록이 랭킹에 남아요.</span></p><input id="nm" maxlength="10" placeholder="이름 (최대 10자)" value="${esc(myName)}"><div class="btns"><button data-act="start">시작!</button><button data-act="close" class="sub">취소</button></div>`,
+          `<h2>🏆 랭크전</h2><p>제한시간 <b>30초</b> 동안<br>폭발지수를 최대한 올려보세요!<br><span class="dim">물건 부수기·동료 날리기·벽 부수기·폭발 보너스 모두 점수!<br>이름별 최고 기록이 랭킹에 남아요.</span></p><input id="nm" maxlength="10" placeholder="이름 (최대 10자)" value="${esc(myName)}"><div class="btns"><button data-act="start">시작!</button><button data-act="close" class="sub">취소</button></div>`,
         );
         setTimeout(() => {
           const i = $("#nm");
@@ -2331,7 +2563,7 @@
         RK.score = 0;
         updRank();
         $("#rkhud").style.display = "flex";
-        $("#rkTime").textContent = "60.0";
+        $("#rkTime").textContent = "30.0";
         const cd = $("#cd");
         cd.style.display = "block";
         [3, 2, 1, "START!"].forEach((t, i) =>
@@ -2340,7 +2572,7 @@
             ts(i < 3 ? 660 : 1000, 0.15, { type: "square", g: 0.1, wet: 0.1 });
             if (i === 3) {
               RK.state = "play";
-              RK.end = performance.now() + 60000;
+              RK.end = performance.now() + 30000;
               setTimeout(() => {
                 cd.style.display = "none";
               }, 700);
@@ -2504,7 +2736,10 @@
         }
         for (const n of npcs) {
           const d = n.userData;
-          setFace(n, d.down > now || d.v.lengthSq() > 0.05 ? "hurt" : "normal");
+          setFace(
+            n,
+            d.down > now || d.v.lengthSq() > 0.05 || d.flee ? "hurt" : "normal",
+          );
           if (d.down > now || d.v.lengthSq() > 0.05) {
             n.position.addScaledVector(d.v, dt);
             d.v.y -= 14 * dt;
@@ -2519,9 +2754,7 @@
             n.rotation.x = THREE.MathUtils.lerp(n.rotation.x, -1.45, 0.2);
           } else {
             n.rotation.x = THREE.MathUtils.lerp(n.rotation.x, 0, 0.12);
-            n.position.lerp(d.home, 0.04);
-            n.position.y = 0;
-            n.position.y += Math.sin(now * 0.003 + d.ph) * 0.015;
+            npcAI(n, d, now, dt);
           }
         }
         for (let i = debris.length - 1; i >= 0; i--) {
