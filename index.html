@@ -469,25 +469,26 @@
       ><button class="pill tog" id="bgm">🎵 배경음 OFF</button>
     </div>
     <div class="help">
-      이동 <b>W A S D</b> / 방향키<br />집기·던지기 <b>E</b> / 클릭
-      (책상·의자·화분도 OK)<br />발차기 <b>Space</b> · 주먹 <b>F</b> · 고함
-      <b>Q</b><br />서류 폭죽 <b>R</b> · 벽을 계속 치면 금이 가다 무너져요<br />상사들은
+      이동 <b>방향키</b><br />집기·던지기 <b>E</b> / 클릭
+      (책상·의자·화분도 OK)<br />발차기 <b>Space</b> · 주먹 <b>F</b><br />고함 <b>D</b> · 욕하기 <b>S</b> · 서류 폭탄 <b>A</b><br />벽을 계속 치면 금이 가다 무너져요<br />상사들은
       가까이 가면 도망가요 — 쫓아가서 혼내주세요!<br />드래그로 시점 회전
     </div>
     <div id="actionbar">
       <button class="action" id="pickupBtn">E 집기·던지기</button
       ><button class="action" id="kickBtn">SPACE 발차기</button
-      ><button class="action" id="shoutBtn">Q 소리 지르기</button
+      ><button class="action" id="shoutBtn">D 고함</button
+      ><button class="action" id="curseBtn">S 욕하기</button
       ><button class="action" id="punchBtn">F 주먹</button
-      ><button class="action" id="rainBtn">R 서류 폭죽</button>
+      ><button class="action" id="rainBtn">A 서류 폭탄</button>
     </div>
     <div id="mobile"><div id="stick"></div></div>
     <div id="mobileActions">
       <button id="mPickup">✋<br />집기·던지기</button
       ><button id="mKick">👟<br />발차기</button
       ><button id="mShout">📢<br />고함</button
+      ><button id="mCurse">🤬<br />욕하기</button
       ><button id="mPunch">👊<br />주먹</button
-      ><button id="mRain">🎉<br />서류 폭죽</button>
+      ><button id="mRain">🎉<br />서류 폭탄</button>
     </div>
     <div id="rkhud">
       ⏱ <span id="rkTime">30.0</span><span>💥 <span id="rkScore">0</span></span>
@@ -1896,9 +1897,37 @@
         })();
         relieve(8);
       }
+      // ---- profanity button: independent of the existing shout action
+      const CURSE_LINES = [
+        "아 씨발 존나 좆같아서 못해먹겠네",
+        "죄다 병신들만 있네",
+        "이 병신 새끼가",
+        "내 눈앞에서 얼쩡거리지마",
+        "쳐돌았네",
+        "왜 사니",
+        "핑프 새끼들아",
+        "아 쫌 꺼져",
+        "그래 니 잘났다",
+        "그래서 어쩌라고",
+        "귓구녕 쳐막혔나",
+        "아 진짜 개빡치네",
+        "지랄도 풍년이다",
+        "대가리는 장식으로 달고 다니냐",
+        "말귀를 못 알아먹네",
+        "아주 염병을 하네",
+        "적당히 좀 해라 미친놈아",
+        "뭘 잘했다고 큰소리야",
+        "아오 씨발 진짜",
+        "닥치고 좀 가만히 있어",
+      ];
+      function curse() {
+        const line = CURSE_LINES[(R() * CURSE_LINES.length) | 0];
+        toast(line);
+        pop(line, avatar.position.clone().add(V(0, 3, 0)));
+      }
       function paperStorm() {
         rain(70);
-        toast("서류 폭죽 발사!!");
+        toast("서류 폭탄 발사!!");
         pop("와르르~", avatar.position.clone().add(V(0, 3, 0)));
         sfx.throw();
         relieve(3);
@@ -2033,8 +2062,9 @@
         if (!keys[k]) {
           if (k === "e") pickup();
           if (k === " ") kick();
-          if (k === "q") shout();
-          if (k === "r") paperStorm();
+          if (k === "d") shout();
+          if (k === "s") curse();
+          if (k === "a") paperStorm();
           if (k === "f") punch();
         }
         keys[k] = true;
@@ -2128,6 +2158,7 @@
         ["#pickupBtn", pickup],
         ["#kickBtn", kick],
         ["#shoutBtn", shout],
+        ["#curseBtn", curse],
         ["#rainBtn", paperStorm],
         ["#punchBtn", punch],
       ].forEach(([s, f]) => ($(s).onclick = f));
@@ -2135,6 +2166,7 @@
         ["#mPickup", pickup],
         ["#mKick", kick],
         ["#mShout", shout],
+        ["#mCurse", curse],
         ["#mRain", paperStorm],
         ["#mPunch", punch],
       ].forEach(([s, f]) =>
@@ -2630,12 +2662,12 @@
           now = performance.now();
         let moving = false;
         const f =
-            (keys.w || keys.arrowup ? 1 : 0) -
-            (keys.s || keys.arrowdown ? 1 : 0) -
+            (keys.arrowup ? 1 : 0) -
+            (keys.arrowdown ? 1 : 0) -
             joy.y,
           sd =
-            (keys.d || keys.arrowright ? 1 : 0) -
-            (keys.a || keys.arrowleft ? 1 : 0) +
+            (keys.arrowright ? 1 : 0) -
+            (keys.arrowleft ? 1 : 0) +
             joy.x;
         if (f || sd) {
           const c = Math.cos(cameraYaw),
