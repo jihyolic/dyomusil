@@ -470,25 +470,25 @@
     </div>
     <div class="help">
       이동 <b>방향키</b><br />집기·던지기 <b>E</b> / 클릭
-      (책상·의자·화분도 OK)<br />발차기 <b>Space</b> · 주먹 <b>F</b><br />고함 <b>D</b> · 욕하기 <b>S</b> · 서류 폭탄 <b>A</b><br />벽을 계속 치면 금이 가다 무너져요<br />상사들은
+      (책상·의자·화분도 OK)<br />발차기 <b>Space</b> · 주먹 <b>F</b><br />고함 <b>D</b> · 욕하기 <b>S</b> · 서류 폭죽 <b>A</b><br />벽을 계속 치면 금이 가다 무너져요<br />상사들은
       가까이 가면 도망가요 — 쫓아가서 혼내주세요!<br />드래그로 시점 회전
     </div>
     <div id="actionbar">
       <button class="action" id="pickupBtn">E 집기·던지기</button
       ><button class="action" id="kickBtn">SPACE 발차기</button
       ><button class="action" id="shoutBtn">D 고함</button
-      ><button class="action" id="curseBtn">S 욕하기</button
+      ><button class="action" id="curseBtn">S 🤬 욕하기</button
       ><button class="action" id="punchBtn">F 주먹</button
-      ><button class="action" id="rainBtn">A 서류 폭탄</button>
+      ><button class="action" id="rainBtn">A 서류 폭죽</button>
     </div>
     <div id="mobile"><div id="stick"></div></div>
     <div id="mobileActions">
       <button id="mPickup">✋<br />집기·던지기</button
       ><button id="mKick">👟<br />발차기</button
-      ><button id="mShout">📢<br />고함</button
-      ><button id="mCurse">🤬<br />욕하기</button
+      ><button id="mShout">📢 D<br />고함</button
+      ><button id="mCurse">🤬 S<br />욕하기</button
       ><button id="mPunch">👊<br />주먹</button
-      ><button id="mRain">🎉<br />서류 폭탄</button>
+      ><button id="mRain">🎉 A<br />서류 폭죽</button>
     </div>
     <div id="rkhud">
       ⏱ <span id="rkTime">30.0</span><span>💥 <span id="rkScore">0</span></span>
@@ -1511,6 +1511,9 @@
         nz(1.6, { t: "bandpass", f: 2400, q: 0.6, g: 0.08, wet: 0.4 });
         ts(70, 0.8, { g: 0.6, to: -45, wet: 0.4 });
       }
+      // Custom shout audio: shared by desktop click, D key, and mobile touch.
+      const shoutAudio = new Audio("./shouting.mp3");
+      shoutAudio.preload = "auto";
       const sfx = {
         crack: () => {
           nz(0.14, { t: "bandpass", f: 2200, q: 5, g: 0.3, wet: 0.2 });
@@ -1567,7 +1570,21 @@
           ts(1800 + R() * 900, 0.5, { type: "triangle", g: 0.04, wet: 0.3 });
           nz(0.5, { f: 2500, to: 200, g: 0.3, wet: 0.3 });
         },
-        shout: bigShout,
+        shout: () => {
+          if (!soundOn) return;
+          try {
+            shoutAudio.pause();
+            shoutAudio.currentTime = 0;
+            const playback = shoutAudio.play();
+            if (playback && typeof playback.catch === "function") {
+              playback.catch((error) =>
+                console.warn("고함 사운드 재생 실패:", error),
+              );
+            }
+          } catch (error) {
+            console.warn("고함 사운드 재생 실패:", error);
+          }
+        },
         riser: () => {
           ts(60, 2.6, { type: "sawtooth", g: 0.16, to: 1200, wet: 0.2 });
           nz(2.6, {
@@ -1927,7 +1944,7 @@
       }
       function paperStorm() {
         rain(70);
-        toast("서류 폭탄 발사!!");
+        toast("서류 폭죽 발사!!");
         pop("와르르~", avatar.position.clone().add(V(0, 3, 0)));
         sfx.throw();
         relieve(3);
