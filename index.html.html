@@ -9,7 +9,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
 :root{--ink:#25313d;--glass:rgba(255,255,255,.88);--accent:#3c6570}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:'Noto Sans KR',sans-serif;background:#c9d4d8;color:var(--ink)}
-#world{position:fixed;inset:0}canvas{display:block}
+#world{position:fixed;inset:0}canvas{display:block;touch-action:none}
 .top{position:fixed;left:22px;top:18px;z-index:3;color:#fff;text-shadow:0 2px 12px #182b36}
 .brand{font-size:25px;font-weight:800;letter-spacing:5px}.tag{font-size:11px;letter-spacing:1px;opacity:.95;margin-top:2px}
 .hud{position:fixed;right:18px;top:18px;z-index:3;display:flex;gap:8px;align-items:center}
@@ -20,25 +20,22 @@
 #actionbar{position:fixed;right:20px;bottom:20px;z-index:4;display:flex;gap:8px}
 .action{border:1px solid #ffffff99;background:#f8faf4e8;color:#29424b;border-radius:13px;padding:12px 15px;font:700 12px inherit;box-shadow:0 4px 18px #172b3620}
 #mobile{display:none;position:fixed;left:14px;bottom:max(16px,env(safe-area-inset-bottom));z-index:5;width:128px;height:128px;border-radius:50%;background:#eaf2edb8;border:2px solid #ffffffd9;box-shadow:0 5px 24px #1d34402a;touch-action:none;user-select:none}
-#stick,#cameraStick{position:absolute;left:50%;top:50%;width:52px;height:52px;transform:translate(-50%,-50%);border-radius:50%;background:linear-gradient(145deg,#fff,#cbd9d4);border:2px solid #ffffff;box-shadow:0 4px 12px #1d344044;pointer-events:none}
-#cameraWheel{display:none;position:fixed;right:14px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:5;width:112px;height:112px;border-radius:50%;background:#eaf2edb8;border:2px solid #ffffffd9;box-shadow:0 5px 24px #1d34402a;touch-action:none;user-select:none}
-#cameraWheel:before{content:"카메라\n회전";position:absolute;inset:0;display:grid;place-items:center;color:#46616a;font-size:10px;font-weight:800;pointer-events:none}
-#cameraStick{width:42px;height:42px;background:linear-gradient(145deg,#fff,#b9cbc4)}
+#stick{position:absolute;left:50%;top:50%;width:52px;height:52px;transform:translate(-50%,-50%);border-radius:50%;background:linear-gradient(145deg,#fff,#cbd9d4);border:2px solid #ffffff;box-shadow:0 4px 12px #1d344044;pointer-events:none}
 #mobileActions{display:none;position:fixed;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:6;gap:6px;flex-wrap:wrap;justify-content:flex-end;width:156px;touch-action:manipulation}
 #mobileActions button{width:74px;min-height:54px;border:1px solid #ffffffed;background:#f8faf4f2;border-radius:16px;padding:7px 4px;font-size:12px;font-weight:800;color:#29424b;box-shadow:0 5px 18px #172b3628;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
 #mobileActions button:active{transform:scale(.94);background:#dce9e2}
-@media(max-width:700px){.top{left:10px;top:9px}.brand{font-size:18px}.tag{font-size:8px;max-width:175px}.hud{right:7px;top:7px}.pill{padding:7px 8px;font-size:9px}.help,#actionbar{display:none}#mobile{display:block}#cameraWheel{display:block}#mobileActions{display:flex}#status{max-width:105px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
-@media(max-width:390px){#mobile{width:116px;height:116px;left:10px}#stick{width:48px;height:48px}#cameraWheel{width:100px;height:100px;right:10px;bottom:calc(145px + env(safe-area-inset-bottom))}#cameraStick{width:38px;height:38px}#mobileActions{width:150px;right:8px;gap:5px}#mobileActions button{width:71px;min-height:50px;font-size:11px}}
+@media(max-width:700px){.top{left:10px;top:9px}.brand{font-size:18px}.tag{font-size:8px;max-width:175px}.hud{right:7px;top:7px}.pill{padding:7px 8px;font-size:9px}.help,#actionbar{display:none}#mobile{display:block}#mobileActions{display:flex}#status{max-width:105px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+@media(max-width:390px){#mobile{width:116px;height:116px;left:10px}#stick{width:48px;height:48px}#mobileActions{width:150px;right:8px;gap:5px}#mobileActions button{width:71px;min-height:50px;font-size:11px}}
 </style>
 </head>
 <body>
 <div id="world"></div>
 <div class="top"><div class="brand">됴무실</div><div class="tag">OFFICE STRESS BREAK · 오늘의 스트레스는 여기에 두고 가요</div></div>
 <div class="hud"><div class="pill" id="status">🏢 오피스 · 자유 행동</div><button class="pill" id="sound">♫ 사운드 켜기</button></div>
-<div class="help">이동 <b>W A S D</b> / 방향키<br>가까운 물건 <b>E</b> 집기<br><b>클릭</b> 던지기 · <b>Space</b> 발차기<br><b>Q</b> 소리 지르기</div>
+<div class="help">이동 <b>W A S D</b> / 방향키<br>가까운 물건 <b>E</b> 집기<br><b>클릭</b> 던지기 · <b>Space</b> 발차기<br><b>Q</b> 고함 지르기</div>
 <div id="actionbar"><button class="action" id="pickupBtn">E 물건 집기</button><button class="action" id="kickBtn">SPACE 발차기</button><button class="action" id="shoutBtn">Q 소리 지르기</button></div>
-<div id="mobile" aria-label="이동 조이스틱"><div id="stick"></div></div>
-<div id="cameraWheel" aria-label="카메라 방향 및 각도 조절 휠"><div id="cameraStick"></div></div>
+<div id="mobile" aria-label="캐릭터 이동 조이스틱"><div id="stick"></div></div>
+
 <div id="mobileActions"><button id="mPickup">✋<br>집기·던지기</button><button id="mKick">👟<br>발차기</button><button id="mShout">📢<br>고함</button></div>
 <div id="toast"></div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
@@ -159,14 +156,58 @@ for(let x of [-.13,.13]){let eye=new THREE.Mesh(new THREE.SphereGeometry(.027,8,
 const arms=[],legs=[];
 for(let x of [-.48,.48]){let arm=addBox(avatar,x,1.08,0,.2,.72,.22,M.suit);arm.rotation.z=x<0?-.12:.12;arms.push(arm);let hand=new THREE.Mesh(new THREE.SphereGeometry(.12,10,8),M.skin);hand.position.set(x,.68,.02);avatar.add(hand)}
 for(let x of [-.2,.2]){let leg=addBox(avatar,x,.38,0,.23,.7,.27,M.navy);legs.push(leg);addBox(avatar,x,.08,.1,.28,.14,.43,M.dark)}
-avatar.position.set(0,0,8);avatar.rotation.y=Math.PI;
+avatar.scale.setScalar(1.12);avatar.position.set(0,0,4.5);avatar.rotation.y=0;
 let held=null,nearProp=null,actionUntil=0,shoutWave=null;
 const keys={};let soundOn=false,audio=null;
 function toast(s){let el=document.querySelector('#toast');el.textContent=s;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1600)}
 function initAudio(){if(!audio){audio=new (window.AudioContext||window.webkitAudioContext)()}if(audio.state==='suspended')audio.resume()}
 function tone(freq,duration=.12,type='sine',gain=.08,slide=0){if(!soundOn)return;initAudio();let o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.setValueAtTime(freq,audio.currentTime);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq+slide),audio.currentTime+duration);g.gain.setValueAtTime(gain,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+duration)}
 function noise(duration=.2,gain=.08){if(!soundOn)return;initAudio();let n=Math.floor(audio.sampleRate*duration),b=audio.createBuffer(1,n,audio.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);let s=audio.createBufferSource(),g=audio.createGain();s.buffer=b;g.gain.value=gain;s.connect(g).connect(audio.destination);s.start()}
-function sfx(type){if(type==='pickup'){tone(420,.07,'triangle',.045,120)}if(type==='throw'){tone(500,.18,'sawtooth',.06,-350);setTimeout(()=>noise(.2,.07),80)}if(type==='hit'){tone(105,.16,'square',.09,-55);noise(.12,.05)}if(type==='kick'){tone(85,.14,'square',.1,-35);noise(.1,.06)}if(type==='shout'){tone(190,.45,'sawtooth',.07,500);noise(.38,.045)}}
+function cinematicShout(){
+  if(!soundOn)return;
+  initAudio();
+  const now=audio.currentTime, master=audio.createGain();
+  master.gain.setValueAtTime(.0001,now);
+  master.gain.exponentialRampToValueAtTime(.42,now+.08);
+  master.gain.setValueAtTime(.34,now+.72);
+  master.gain.exponentialRampToValueAtTime(.0001,now+1.65);
+  const comp=audio.createDynamicsCompressor();
+  comp.threshold.value=-18;comp.knee.value=18;comp.ratio.value=5;
+  comp.attack.value=.004;comp.release.value=.22;
+  master.connect(comp);comp.connect(audio.destination);
+
+  // Two detuned vocal-like layers create a rough, forceful "WAAAAAAH".
+  [0,1].forEach((i)=>{
+    const osc=audio.createOscillator(),filter=audio.createBiquadFilter(),gain=audio.createGain();
+    osc.type='sawtooth';
+    osc.frequency.setValueAtTime(i?185:390,now);
+    osc.frequency.exponentialRampToValueAtTime(i?285:760,now+.38);
+    osc.frequency.setValueAtTime(i?250:650,now+.75);
+    osc.frequency.exponentialRampToValueAtTime(i?115:260,now+1.55);
+    filter.type='bandpass';filter.frequency.setValueAtTime(i?520:1150,now);
+    filter.frequency.exponentialRampToValueAtTime(i?850:1750,now+.35);
+    filter.Q.value=i?1.1:1.8;
+    gain.gain.setValueAtTime(i?.0001:.0001,now);
+    gain.gain.linearRampToValueAtTime(i?.22:.16,now+.09);
+    gain.gain.setValueAtTime(i?.18:.13,now+.7);
+    gain.gain.exponentialRampToValueAtTime(.0001,now+1.58);
+    osc.connect(filter).connect(gain).connect(master);
+    osc.start(now);osc.stop(now+1.62);
+  });
+  // Fast pitch wobble and a burst of distorted air add panic / cinematic impact.
+  const lfo=audio.createOscillator(),lfoGain=audio.createGain();
+  lfo.frequency.value=7.2;lfoGain.gain.value=34;
+  lfo.connect(lfoGain);
+  lfoGain.connect(master);lfo.start(now);lfo.stop(now+1.5);
+  const n=Math.floor(audio.sampleRate*.62),buf=audio.createBuffer(1,n,audio.sampleRate),data=buf.getChannelData(0);
+  for(let i=0;i<n;i++){const env=Math.pow(1-i/n,1.8);data[i]=(Math.random()*2-1)*env}
+  const src=audio.createBufferSource(),nf=audio.createBiquadFilter(),ng=audio.createGain();
+  src.buffer=buf;nf.type='lowpass';nf.frequency.value=1800;
+  ng.gain.setValueAtTime(.0001,now);ng.gain.linearRampToValueAtTime(.13,now+.025);
+  ng.gain.exponentialRampToValueAtTime(.0001,now+.62);
+  src.connect(nf).connect(ng).connect(master);src.start(now);
+}
+function sfx(type){if(type==='pickup'){tone(420,.07,'triangle',.045,120)}if(type==='throw'){tone(500,.18,'sawtooth',.06,-350);setTimeout(()=>noise(.2,.07),80)}if(type==='hit'){tone(105,.16,'square',.09,-55);noise(.12,.05)}if(type==='kick'){tone(85,.14,'square',.1,-35);noise(.1,.06)}if(type==='shout'){cinematicShout()}}
 function forward(){return new THREE.Vector3(Math.sin(avatar.rotation.y),0,Math.cos(avatar.rotation.y)).normalize()}
 function nearestProp(){let best=null,dist=2.25;for(const p of props){if(p.userData.held)continue;let d=avatar.position.distanceTo(p.position);if(d<dist){dist=d;best=p}}return best}
 function pickup(){if(held){throwHeld();return}nearProp=nearestProp();if(!nearProp){toast('가까이에 집을 수 있는 물건이 없어요');return}held=nearProp;held.userData.held=true;sfx('pickup');toast(held.userData.name+'을(를) 들었어요 · 클릭 또는 E로 던지기')}
@@ -190,19 +231,23 @@ joystick.addEventListener('pointerdown',e=>{e.preventDefault();joy.pointer=e.poi
 joystick.addEventListener('pointermove',e=>{if(joy.pointer===e.pointerId){e.preventDefault();updateJoy(e)}});
 ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>joystick.addEventListener(ev,resetJoy));
 
-// Right-side camera wheel: drag left/right to orbit and up/down to tilt the view.
-const cameraWheel=document.querySelector('#cameraWheel'),cameraStick=document.querySelector('#cameraStick');
-const camTouch={x:0,y:0,pointer:null};let cameraYaw=.675,cameraPitch=.58;
-function updateCameraWheel(e){
-  const r=cameraWheel.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
-  const max=r.width*.32,dx=e.clientX-cx,dy=e.clientY-cy,len=Math.hypot(dx,dy),scale=len>max?max/len:1;
-  camTouch.x=dx*scale/max;camTouch.y=dy*scale/max;
-  cameraStick.style.left=`calc(50% + ${camTouch.x*max}px)`;cameraStick.style.top=`calc(50% + ${camTouch.y*max}px)`;
-}
-function resetCameraWheel(){camTouch.x=0;camTouch.y=0;camTouch.pointer=null;cameraStick.style.left='50%';cameraStick.style.top='50%'}
-cameraWheel.addEventListener('pointerdown',e=>{e.preventDefault();camTouch.pointer=e.pointerId;cameraWheel.setPointerCapture(e.pointerId);updateCameraWheel(e)});
-cameraWheel.addEventListener('pointermove',e=>{if(camTouch.pointer===e.pointerId){e.preventDefault();updateCameraWheel(e)}});
-['pointerup','pointercancel','lostpointercapture'].forEach(ev=>cameraWheel.addEventListener(ev,resetCameraWheel));
+// Touch/mouse drag directly on the 3D scene to orbit and tilt the camera.
+let cameraDrag=null;
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch' || e.button===0){
+    cameraDrag={id:e.pointerId,x:e.clientX,y:e.clientY};
+    renderer.domElement.setPointerCapture(e.pointerId);
+  }
+});
+renderer.domElement.addEventListener('pointermove',e=>{
+  if(!cameraDrag || cameraDrag.id!==e.pointerId)return;
+  const dx=e.clientX-cameraDrag.x,dy=e.clientY-cameraDrag.y;
+  cameraDrag.x=e.clientX;cameraDrag.y=e.clientY;
+  cameraYaw-=dx*.006;
+  cameraPitch=THREE.MathUtils.clamp(cameraPitch+dy*.005,.12,1.12);
+});
+function endCameraDrag(e){if(cameraDrag && cameraDrag.id===e.pointerId)cameraDrag=null}
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>renderer.domElement.addEventListener(ev,endCameraDrag));
 document.querySelector('#sound').onclick=()=>{soundOn=!soundOn;if(soundOn){initAudio();tone(660,.08,'sine',.04)}document.querySelector('#sound').textContent=soundOn?'♫ 사운드 켜짐':'♫ 사운드 켜기';toast(soundOn?'효과음을 켰어요':'효과음을 껐어요')};
 document.querySelector('#pickupBtn').onclick=act;document.querySelector('#kickBtn').onclick=kick;document.querySelector('#shoutBtn').onclick=shout;
 function bindTouchAction(id,fn){const el=document.querySelector(id);el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();fn()});}
@@ -217,12 +262,11 @@ let t=performance.now()*.01;if(moving){legs[0].rotation.x=Math.sin(t)*.55;legs[1
 if(held){held.position.copy(avatar.position).add(forward().multiplyScalar(.85));held.position.y=1.35;held.rotation.set(0,avatar.rotation.y,0)}
 for(const p of props){if(p.userData.held)continue;let v=p.userData.velocity;if(v.lengthSq()>.01){p.position.addScaledVector(v,dt);v.y-=12*dt;p.rotation.x+=p.userData.spin.x*dt;p.rotation.y+=p.userData.spin.y*dt;p.rotation.z+=p.userData.spin.z*dt;if(p.position.y<.25){p.position.y=.25;v.y=Math.abs(v.y)*.32;v.x*=.72;v.z*=.72;p.userData.spin.multiplyScalar(.65);if(v.length()>1.5){sfx('hit');p.userData.velocity.multiplyScalar(.72)}}if(p.position.y<.27&&v.length()<.7){v.set(0,0,0);p.userData.spin.set(0,0,0)}p.position.x=THREE.MathUtils.clamp(p.position.x,-16,16);p.position.z=THREE.MathUtils.clamp(p.position.z,-12,12)}}
 nearProp=nearestProp();document.querySelector('#status').textContent=held?'✋ '+held.userData.name+' 들고 있음':nearProp?'E · '+nearProp.userData.name+' 집기':'🏢 오피스 · 자유 행동';
-look.set(avatar.position.x,1.15,avatar.position.z);cameraYaw-=camTouch.x*dt*2.25;
-cameraPitch=THREE.MathUtils.clamp(cameraPitch+camTouch.y*dt*1.55,.18,1.18);
-const camDistance=13.2,horizontal=Math.cos(cameraPitch)*camDistance;
+look.set(avatar.position.x,1.15,avatar.position.z);
+const camDistance=9.8,horizontal=Math.cos(cameraPitch)*camDistance;
 let desired=new THREE.Vector3(
  avatar.position.x+Math.sin(cameraYaw)*horizontal,
- avatar.position.y+Math.sin(cameraPitch)*camDistance+1.2,
+ avatar.position.y+Math.sin(cameraPitch)*camDistance+1.0,
  avatar.position.z+Math.cos(cameraYaw)*horizontal
 );
 camera.position.lerp(desired,1-Math.pow(.001,dt));camera.lookAt(look);renderer.render(scene,camera)}
