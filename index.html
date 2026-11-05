@@ -282,12 +282,6 @@
         #mobileActions {
           display: flex;
         }
-        #status {
-          max-width: 110px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
         .pop {
           font-size: 26px;
         }
@@ -464,9 +458,7 @@
     <div class="hud">
       <button class="pill" id="rankBtn">🏆 랭크전</button
       ><button class="pill" id="boardBtn">📊 랭킹</button>
-      <div class="pill" id="status">🏢 오피스 · 자유 행동</div>
-      <button class="pill tog" id="sound">🔇 효과음 OFF</button
-      ><button class="pill tog" id="bgm">🎵 배경음 OFF</button>
+      <button class="pill tog" id="sound">🔇 효과음 OFF</button>
     </div>
     <div class="help">
       이동 <b>방향키</b><br />집기·던지기 <b>E</b> / 클릭
@@ -1318,7 +1310,7 @@
         s.connect(v).connect(audio.destination);
         s.start();
       }
-      let master, rev, hum, ambT;
+      let master, rev;
       function bus() {
         initAudio();
         if (master) return;
@@ -1405,60 +1397,6 @@
         route(v, wet);
         os.start(t0);
         os.stop(t0 + d + 0.05);
-      }
-      function amb(on) {
-        clearInterval(ambT);
-        if (hum) {
-          try {
-            hum.stop();
-          } catch (e) {}
-          hum = null;
-        }
-        if (!on) return;
-        bus();
-        const n = audio.sampleRate * 2,
-          b = audio.createBuffer(1, n, audio.sampleRate),
-          c = b.getChannelData(0);
-        let l = 0;
-        for (let i = 0; i < n; i++) {
-          l = (l + (R() * 2 - 1) * 0.04) / 1.02;
-          c[i] = l * 8;
-        }
-        hum = audio.createBufferSource();
-        hum.buffer = b;
-        hum.loop = true;
-        const f = audio.createBiquadFilter(),
-          v = audio.createGain();
-        f.type = "lowpass";
-        f.frequency.value = 380;
-        v.gain.value = 0.07;
-        hum.connect(f);
-        f.connect(v);
-        v.connect(master);
-        hum.start();
-        ambT = setInterval(() => {
-          if (!ambOn) return;
-          if (R() < 0.55)
-            for (let i = 0; i < 3 + ((R() * 4) | 0); i++)
-              nz(0.02, {
-                t: "highpass",
-                f: 3200 + R() * 2500,
-                g: 0.035,
-                at: i * 0.09 + R() * 0.04,
-                wet: 0.05,
-                force: true,
-              });
-          if (R() < 0.05) {
-            for (let i = 0; i < 4; i++)
-              ts(i % 2 ? 1250 : 1050, 0.09, {
-                type: "sine",
-                g: 0.03,
-                at: i * 0.16 + (i > 1 ? 0.3 : 0),
-                wet: 0.3,
-                force: true,
-              });
-          }
-        }, 800);
       }
       function bigShout() {
         if (!soundOn) return;
@@ -2148,7 +2086,6 @@
         }
       });
       cv.addEventListener("pointercancel", () => (drag = null));
-      let ambOn = false;
       $("#sound").onclick = () => {
         soundOn = !soundOn;
         if (soundOn) {
@@ -2159,17 +2096,6 @@
         $("#sound").textContent = soundOn ? "🔊 효과음 ON" : "🔇 효과음 OFF";
         $("#sound").classList.toggle("on", soundOn);
         toast(soundOn ? "효과음을 켰어요" : "효과음을 껐어요");
-      };
-      $("#bgm").onclick = () => {
-        ambOn = !ambOn;
-        if (ambOn) {
-          initAudio();
-          bus();
-        }
-        amb(ambOn);
-        $("#bgm").textContent = ambOn ? "🎵 배경음 ON" : "🎵 배경음 OFF";
-        $("#bgm").classList.toggle("on", ambOn);
-        toast(ambOn ? "배경음을 켰어요" : "배경음을 껐어요");
       };
       [
         ["#pickupBtn", pickup],
@@ -2886,11 +2812,6 @@
         boomLight.intensity = Math.max(0, boomLight.intensity - dt * 500);
         rankTick(now);
         const near = nearest();
-        $("#status").textContent = held
-          ? "✋ " + held.userData.name + " 들고 있음 · 클릭으로 던지기"
-          : near
-            ? "E · " + near.userData.name + " 집기"
-            : "🏢 오피스 · 자유 행동";
         look.set(avatar.position.x, 1.2, avatar.position.z);
         const dist = 10.5,
           h = Math.cos(cameraPitch) * dist,
