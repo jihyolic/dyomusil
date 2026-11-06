@@ -432,15 +432,15 @@
       }
     </style>
     <!-- 됴무실 앱 아이콘 -->
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-<!-- 브라우저 아이콘 -->
-<link rel="icon" type="image/png" href="/apple-touch-icon.png">
+    <!-- 브라우저 아이콘 -->
+    <link rel="icon" type="image/png" href="/apple-touch-icon.png" />
 
-<!-- iPhone 웹 앱 설정 -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="됴무실">
-<meta name="mobile-web-app-capable" content="yes">
+    <!-- iPhone 웹 앱 설정 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="됴무실" />
+    <meta name="mobile-web-app-capable" content="yes" />
   </head>
   <body>
     <div id="world"></div>
@@ -461,8 +461,9 @@
       <button class="pill tog" id="sound">🔇 효과음 OFF</button>
     </div>
     <div class="help">
-      이동 <b>방향키</b><br />집기·던지기 <b>E</b> / 클릭
-      (책상·의자·화분도 OK)<br />발차기 <b>Space</b> · 주먹 <b>F</b><br />고함 <b>D</b> · 욕하기 <b>S</b> · 서류 폭죽 <b>A</b><br />벽을 계속 치면 금이 가다 무너져요<br />상사들은
+      이동 <b>방향키</b><br />집기·던지기 <b>E</b> / 클릭 (책상·의자·화분도
+      OK)<br />발차기 <b>Space</b> · 주먹 <b>F</b><br />고함 <b>D</b> · 욕하기
+      <b>S</b> · 서류 폭죽 <b>A</b><br />벽을 계속 치면 금이 가다 무너져요<br />상사들은
       가까이 가면 도망가요 — 쫓아가서 혼내주세요!<br />드래그로 시점 회전
     </div>
     <div id="actionbar">
@@ -1257,6 +1258,28 @@
           f.style.opacity = 0;
         });
       }
+      // ---- 밸런스 설정 (여기 숫자만 바꿔서 조절)
+      const BAL = {
+        shoutCd: 5000, // 고함 쿨타임(ms)
+        shoutBase: 3, // 고함 기본 점수 (×3 = 9점)
+        shoutPerNpc: 1, // 고함에 날아간 직원 1명당 (×3 = 3점)
+        shoutNpcMax: 3, // 직원 보너스 최대 인원
+        shoutPropScore: 1, // 고함에 날아간 물건이 부서질 때 (×3 = 3점)
+        paperCd: 3000, // 서류 폭죽 쿨타임(ms)
+        paperScore: 1, // ×3 = 3점
+        curseScore: 0, // 0이면 점수 없음 (원래 동작)
+        moveSpeed: 8, // 기본 5.2
+      };
+      const cdT = {};
+      function cool(key, label, ms) {
+        const n = performance.now();
+        if (n < (cdT[key] || 0)) {
+          toast(`${label} 쿨타임 ${((cdT[key] - n) / 1000).toFixed(1)}초`);
+          return false;
+        }
+        cdT[key] = n + ms;
+        return true;
+      }
       function relieve(n) {
         if (RK.state === "play") {
           RK.score += Math.max(1, Math.round(n * 3));
@@ -1608,9 +1631,11 @@
           words[(R() * words.length) | 0],
           p.position.clone().add(V(0, 1, 0)),
         );
-        relieve((big ? 5 : 3.5) + (d.furn ? 2 : 0));
+        // 고함으로 날아간 물건은 낮은 점수만 부여
+        if (d.soft && performance.now() < d.soft) relieve(BAL.shoutPropScore);
+        else relieve((big ? 5 : 3.5) + (d.furn ? 2 : 0));
       }
-      function knock(n, dir, power, txt) {
+      function knock(n, dir, power, txt, quiet) {
         const d = n.userData;
         d.v.copy(dir).multiplyScalar(power);
         d.v.y = power * 0.45;
@@ -1623,7 +1648,7 @@
           "#2d6a8a",
         );
         sfx.hit();
-        relieve(4);
+        if (!quiet) relieve(4);
         shake = Math.max(shake, 0.3);
       }
       const fwd = () =>
@@ -1800,6 +1825,7 @@
         } else toast("휙! 허공에 발차기");
       }
       function shout() {
+        if (!cool("shout", "고함", BAL.shoutCd)) return;
         sfx.shout();
         toast("아아아아악!!! 오늘 스트레스 여기 두고 간다!!!");
         flash(0.55);
@@ -1808,11 +1834,14 @@
         setFace(avatar, "shout");
         setTimeout(() => setFace(avatar, "normal"), 900);
         pop("아아아악!!!", avatar.position.clone().add(V(0, 3, 0)));
+        let hitN = 0;
         for (const n of npcs) {
           const o = n.position.clone().sub(avatar.position);
           o.y = 0;
-          if (o.length() < 10)
-            knock(n, o.normalize(), 9 - o.length() * 0.4, "깜짝이야!");
+          if (o.length() < 10) {
+            knock(n, o.normalize(), 9 - o.length() * 0.4, "깜짝이야!", true);
+            hitN++;
+          }
         }
         for (const p of props) {
           const d = p.userData;
@@ -1825,6 +1854,7 @@
               .multiplyScalar(8 * furnK(d))
               .add(V(0, 5, 0));
             d.spin.set(R() * 8, R() * 8, R() * 8);
+            d.soft = performance.now() + 2500; // 이 시간 안에 부서지면 낮은 점수
           }
         }
         const ring = new THREE.Mesh(
@@ -1850,7 +1880,9 @@
               ring.geometry.dispose(),
               ring.material.dispose());
         })();
-        relieve(8);
+        relieve(
+          BAL.shoutBase + Math.min(hitN, BAL.shoutNpcMax) * BAL.shoutPerNpc,
+        );
       }
       // ---- profanity button: independent of the existing shout action
       const CURSE_LINES = [
@@ -1879,13 +1911,15 @@
         const line = CURSE_LINES[(R() * CURSE_LINES.length) | 0];
         toast(line);
         pop(line, avatar.position.clone().add(V(0, 3, 0)));
+        if (BAL.curseScore > 0) relieve(BAL.curseScore);
       }
       function paperStorm() {
+        if (!cool("paper", "서류 폭죽", BAL.paperCd)) return;
         rain(70);
         toast("서류 폭죽 발사!!");
         pop("와르르~", avatar.position.clone().add(V(0, 3, 0)));
         sfx.throw();
-        relieve(3);
+        relieve(BAL.paperScore);
       }
       const fires = [],
         boomLight = new THREE.PointLight(0xff7a1a, 0, 70, 1.4);
@@ -1986,6 +2020,7 @@
               .add(V(R() - 0.5, 0, R() - 0.5)),
             16,
             "으아아악!!!",
+            true,
           );
         burst(V(0, 2, 0), 0xffb347, 60, 18);
         rain(120);
@@ -2366,7 +2401,8 @@
         $("#modal").style.display = "none";
       }
       // 공용 랭킹 주소: Vercel 함수면 '/api/scores', 구글 Apps Script 웹앱이면 그 배포 URL(https://script.google.com/macros/s/.../exec)을 넣으세요
-      const RANK_API = "https://script.google.com/macros/s/AKfycbxEGaylbZYp8IdOefKoV_I_cfwB7Dp11M350WKQEzSBYMAGg9fCky3ES-qKjeiQBu8krg/exec";
+      const RANK_API =
+        "https://script.google.com/macros/s/AKfycbxEGaylbZYp8IdOefKoV_I_cfwB7Dp11M350WKQEzSBYMAGg9fCky3ES-qKjeiQBu8krg/exec";
       let lastErr = "";
       function diag(e) {
         if (!RANK_API.startsWith("http"))
@@ -2495,10 +2531,12 @@
           held.userData.held = false;
           held = null;
         }
+        for (const k in cdT) delete cdT[k]; // 쿨타임 초기화
         for (const p of props) {
           const d = p.userData;
           d.held = false;
           d.dead = false;
+          d.soft = 0;
           d.v.set(0, 0, 0);
           d.spin.set(0, 0, 0);
           p.visible = true;
@@ -2604,19 +2642,13 @@
         const dt = Math.min(clock.getDelta(), 0.04),
           now = performance.now();
         let moving = false;
-        const f =
-            (keys.arrowup ? 1 : 0) -
-            (keys.arrowdown ? 1 : 0) -
-            joy.y,
-          sd =
-            (keys.arrowright ? 1 : 0) -
-            (keys.arrowleft ? 1 : 0) +
-            joy.x;
+        const f = (keys.arrowup ? 1 : 0) - (keys.arrowdown ? 1 : 0) - joy.y,
+          sd = (keys.arrowright ? 1 : 0) - (keys.arrowleft ? 1 : 0) + joy.x;
         if (f || sd) {
           const c = Math.cos(cameraYaw),
             s = Math.sin(cameraYaw),
             v = V(sd * c - f * s, 0, -sd * s - f * c).normalize();
-          avatar.position.addScaledVector(v, 5.2 * dt);
+          avatar.position.addScaledVector(v, BAL.moveSpeed * dt);
           avatar.position.x = THREE.MathUtils.clamp(
             avatar.position.x,
             -16.1,
