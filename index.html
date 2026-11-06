@@ -1226,7 +1226,8 @@
         score = 0,
         done = false,
         cameraYaw = 0,
-        cameraPitch = 0.75;
+        camOff = 0, // 드래그로 잠깐 돌려보는 각도 (손을 떼면 자동 복귀)
+        cameraPitch = 0.6;
       const keys = {};
       let soundOn = false,
         audio = null;
@@ -1269,6 +1270,7 @@
         paperScore: 1, // ×3 = 3점
         curseScore: 0, // 0이면 점수 없음 (원래 동작)
         moveSpeed: 8, // 기본 5.2
+        turnSpeed: 2.8, // 회전 속도(rad/s)
       };
       const cdT = {};
       function cool(key, label, ms) {
@@ -2107,7 +2109,7 @@
         drag.moved += Math.abs(dx) + Math.abs(dy);
         drag.x = e.clientX;
         drag.y = e.clientY;
-        cameraYaw -= dx * 0.006;
+        camOff -= dx * 0.006;
         cameraPitch = THREE.MathUtils.clamp(
           cameraPitch + dy * 0.005,
           0.15,
@@ -2574,6 +2576,16 @@
         $("#pct").textContent = 100;
         $("#fill").style.width = "0%";
         avatar.position.set(0, 0, 2);
+        score = 0;
+        stress = 100;
+        $("#score").textContent = 0;
+        $("#pct").textContent = 100;
+        $("#fill").style.width = "0%";
+        avatar.position.set(0, 0, 2);
+        avatar.rotation.y = Math.PI;
+        cameraYaw = 2 * Math.PI;
+        camOff = 0;
+      }
       }
       function startRank(name) {
         myName = name;
@@ -2642,21 +2654,20 @@
         const dt = Math.min(clock.getDelta(), 0.04),
           now = performance.now();
         let moving = false;
-        const f = (keys.arrowup ? 1 : 0) - (keys.arrowdown ? 1 : 0) - joy.y,
-          sd = (keys.arrowright ? 1 : 0) - (keys.arrowleft ? 1 : 0) + joy.x;
-        if (f || sd) {
-          const c = Math.cos(cameraYaw),
-            s = Math.sin(cameraYaw),
-            v = V(sd * c - f * s, 0, -sd * s - f * c).normalize();
-          avatar.position.addScaledVector(v, BAL.moveSpeed * dt);
-          avatar.position.x = THREE.MathUtils.clamp(
-            avatar.position.x,
-            -16.1,
-            16.1,
-          );
-          avatar.position.z = THREE.MathUtils.clamp(avatar.position.z, -13, 12);
-          avatar.rotation.y = Math.atan2(v.x, v.z);
-          moving = true;
+const f = THREE.MathUtils.clamp(
+    (keys.arrowup ? 1 : 0) - (keys.arrowdown ? 1 : 0) - joy.y,
+    -1,
+    1,
+  ),
+  turn = (keys.arrowright ? 1 : 0) - (keys.arrowleft ? 1 : 0) + joy.x;
+if (turn) avatar.rotation.y -= turn * BAL.turnSpeed * dt;
+if (f) {
+  const spd = f > 0 ? BAL.moveSpeed : BAL.moveSpeed * 0.6;
+  avatar.position.addScaledVector(fwd(), f * spd * dt);
+  avatar.position.x = THREE.MathUtils.clamp(avatar.position.x, -16.1, 16.1);
+  avatar.position.z = THREE.MathUtils.clamp(avatar.position.z, -13, 12);
+  moving = true;
+}
         }
         const t = now * 0.012;
         if (moving && now > actionUntil) {
@@ -2844,14 +2855,23 @@
         boomLight.intensity = Math.max(0, boomLight.intensity - dt * 500);
         rankTick(now);
         const near = nearest();
-        look.set(avatar.position.x, 1.2, avatar.position.z);
-        const dist = 10.5,
-          h = Math.cos(cameraPitch) * dist,
-          want = V(
-            avatar.position.x + Math.sin(cameraYaw) * h,
-            Math.sin(cameraPitch) * dist + 1,
-            avatar.position.z + Math.cos(cameraYaw) * h,
-          );
+      // 캐릭터 뒤를 자동으로 따라가는 카메라
+const tgtYaw = avatar.rotation.y + Math.PI;
+const dyaw =
+  ((tgtYaw - cameraYaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+cameraYaw += dyaw * (1 - Math.pow(0.0005, dt));
+if (!drag) camOff *= Math.pow(0.05, dt);
+const yaw = cameraYaw + camOff;
+// 캐릭터보다 조금 앞을 바라보게 해서 전방이 더 잘 보이게
+const ahead = fwd().multiplyScalar(3);
+look.set(avatar.position.x + ahead.x, 1.2, avatar.position.z + ahead.z);
+const dist = 10.5,
+  h = Math.cos(cameraPitch) * dist,
+  want = V(
+    avatar.position.x + Math.sin(yaw) * h,
+    Math.sin(cameraPitch) * dist + 1,
+    avatar.position.z + Math.cos(yaw) * h,
+  );
         camera.position.lerp(want, 1 - Math.pow(0.001, dt));
         if (shake > 0) {
           camera.position.add(
