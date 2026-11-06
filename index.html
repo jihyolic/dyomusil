@@ -2107,7 +2107,6 @@
         drag.moved += Math.abs(dx) + Math.abs(dy);
         drag.x = e.clientX;
         drag.y = e.clientY;
-        cameraYaw -= dx * 0.006;
         cameraPitch = THREE.MathUtils.clamp(
           cameraPitch + dy * 0.005,
           0.15,
@@ -2644,18 +2643,24 @@
         let moving = false;
         const f = (keys.arrowup ? 1 : 0) - (keys.arrowdown ? 1 : 0) - joy.y,
           sd = (keys.arrowright ? 1 : 0) - (keys.arrowleft ? 1 : 0) + joy.x;
+        if (sd) avatar.rotation.y -= sd * 2.8 * dt;
         if (f || sd) {
-          const c = Math.cos(cameraYaw),
-            s = Math.sin(cameraYaw),
-            v = V(sd * c - f * s, 0, -sd * s - f * c).normalize();
-          avatar.position.addScaledVector(v, BAL.moveSpeed * dt);
-          avatar.position.x = THREE.MathUtils.clamp(
-            avatar.position.x,
-            -16.1,
-            16.1,
-          );
-          avatar.position.z = THREE.MathUtils.clamp(avatar.position.z, -13, 12);
-          avatar.rotation.y = Math.atan2(v.x, v.z);
+          if (f) {
+            avatar.position.addScaledVector(
+              fwd(),
+              THREE.MathUtils.clamp(f, -1, 1) * BAL.moveSpeed * dt,
+            );
+            avatar.position.x = THREE.MathUtils.clamp(
+              avatar.position.x,
+              -16.1,
+              16.1,
+            );
+            avatar.position.z = THREE.MathUtils.clamp(
+              avatar.position.z,
+              -13,
+              12,
+            );
+          }
           moving = true;
         }
         const t = now * 0.012;
@@ -2843,6 +2848,12 @@
         }
         boomLight.intensity = Math.max(0, boomLight.intensity - dt * 500);
         rankTick(now);
+        const camTarget = avatar.rotation.y + Math.PI;
+        let camDiff = Math.atan2(
+          Math.sin(camTarget - cameraYaw),
+          Math.cos(camTarget - cameraYaw),
+        );
+        cameraYaw += camDiff * (1 - Math.pow(0.0005, dt));
         const near = nearest();
         look.set(avatar.position.x, 1.2, avatar.position.z);
         const dist = 10.5,
