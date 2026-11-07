@@ -1947,6 +1947,7 @@
         sfx.throw();
         relieve(BAL.paperScore);
       }
+      const EXPLODE_RESET_MS = 5000; // 폭발 후 복구 시간(ms). 기존 약 10500 → 5000
       const fires = [],
         boomLight = new THREE.PointLight(0xff7a1a, 0, 70, 1.4);
       boomLight.position.set(0, 6, 0);
@@ -1985,7 +1986,7 @@
               w.hp = 0;
               w.m.visible = true;
               w.m.material.color.copy(w.base);
-            }, 10600);
+            }, EXPLODE_RESET_MS);
           }
         });
         shake = 3;
@@ -2034,7 +2035,7 @@
           d.dead = true;
           p.visible = false;
           d.held = false;
-          d.t = performance.now() + 11000;
+          d.t = performance.now() + EXPLODE_RESET_MS;
         }
         for (const n of npcs)
           knock(
@@ -2052,22 +2053,32 @@
         rain(120);
         pop("콰콰쾅!!!", V(0, 3, 0), "#7a1f1f");
         setTimeout(() => {
-          for (const o of furn) {
-            const d = o.userData;
-            d.fly = false;
-            o.position.copy(d.hp);
-            o.rotation.copy(d.hr);
-          }
-          score = 0;
-          stress = 100;
-          $("#score").textContent = 0;
-          $("#pct").textContent = 100;
-          $("#fill").style.width = "0%";
-          boom = false;
-          toast("🧹 사무실 복구 완료! 다시 스트레스를 풀어보세요");
-          flash(0.6);
-        }, 10500);
-      }
+  for (const o of furn) {
+    const d = o.userData;
+    d.fly = false;
+    o.position.copy(d.hp);
+    o.rotation.copy(d.hr);
+  }
+  // 직원 전원 처음 자리로 리셋
+  for (const n of npcs) {
+    const d = n.userData;
+    d.v.set(0, 0, 0);
+    d.down = 0;
+    d.tgt = null;
+    d.idle = 0;
+    d.side = 0;
+    n.position.copy(d.home);
+    n.rotation.set(0, d.ry, 0);
+  }
+  score = 0;
+  stress = 100;
+  $("#score").textContent = 0;
+  $("#pct").textContent = 100;
+  $("#fill").style.width = "0%";
+  boom = false;
+  toast("🧹 사무실 복구 완료! 다시 스트레스를 풀어보세요");
+  flash(0.6);
+}, EXPLODE_RESET_MS);
       addEventListener("keydown", (e) => {
         if (e.target && e.target.tagName === "INPUT") return;
         const k = e.key.toLowerCase();
