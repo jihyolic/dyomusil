@@ -1259,7 +1259,7 @@
         });
       }
       // ---- 밸런스 설정 (여기 숫자만 바꿔서 조절)
-       const BAL = {
+      const BAL = {
         shoutCd: 5000, // 고함 쿨타임(ms)
         shoutBase: 7, // 고함 기본 점수 (×3 = 21점)
         shoutPerNpc: 1, // 고함에 날아간 직원 1명당 (×3 = 3점)
@@ -1918,16 +1918,26 @@
         "아오 씨발 진짜",
         "닥치고 좀 가만히 있어",
       ];
-      const CURSE_COLORS = ["#c0392b", "#8e44ad", "#d35400", "#2d6a8a", "#b9770e"];
+      const CURSE_COLORS = [
+        "#c0392b",
+        "#8e44ad",
+        "#d35400",
+        "#2d6a8a",
+        "#b9770e",
+      ];
       let curseN = 0;
       function curse() {
         const line = CURSE_LINES[(R() * CURSE_LINES.length) | 0];
-        
+
         // 연타할 때마다 위치가 겹치지 않게 좌우/상하로 퍼뜨림
         const slot = curseN++ % 6; // 6칸을 돌아가며 사용
         const ox = (slot - 2.5) * 1.1 + (R() - 0.5) * 0.5; // 좌우 퍼짐 (월드 좌표)
         const oy = 2.4 + (slot % 3) * 0.55 + R() * 0.3; // 높이도 계단식
-        const side = V(Math.cos(avatar.rotation.y), 0, -Math.sin(avatar.rotation.y));
+        const side = V(
+          Math.cos(avatar.rotation.y),
+          0,
+          -Math.sin(avatar.rotation.y),
+        );
         const pos = avatar.position
           .clone()
           .addScaledVector(side, ox)
@@ -1938,7 +1948,7 @@
         // 상단 토스트는 짧게 갱신 (연타 시 계속 바뀌는 용도)
         toast(line);
         if (BAL.curseScore > 0) relieve(BAL.curseScore);
-      }  
+      }
       function paperStorm() {
         if (!cool("paper", "서류 폭죽", BAL.paperCd)) return;
         rain(70);
@@ -2053,32 +2063,33 @@
         rain(120);
         pop("콰콰쾅!!!", V(0, 3, 0), "#7a1f1f");
         setTimeout(() => {
-  for (const o of furn) {
-    const d = o.userData;
-    d.fly = false;
-    o.position.copy(d.hp);
-    o.rotation.copy(d.hr);
-  }
-  // 직원 전원 처음 자리로 리셋
-  for (const n of npcs) {
-    const d = n.userData;
-    d.v.set(0, 0, 0);
-    d.down = 0;
-    d.tgt = null;
-    d.idle = 0;
-    d.side = 0;
-    n.position.copy(d.home);
-    n.rotation.set(0, d.ry, 0);
-  }
-  score = 0;
-  stress = 100;
-  $("#score").textContent = 0;
-  $("#pct").textContent = 100;
-  $("#fill").style.width = "0%";
-  boom = false;
-  toast("🧹 사무실 복구 완료! 다시 스트레스를 풀어보세요");
-  flash(0.6);
-}, EXPLODE_RESET_MS);
+          for (const o of furn) {
+            const d = o.userData;
+            d.fly = false;
+            o.position.copy(d.hp);
+            o.rotation.copy(d.hr);
+          }
+          // 직원 전원 처음 자리로 리셋
+          for (const n of npcs) {
+            const d = n.userData;
+            d.v.set(0, 0, 0);
+            d.down = 0;
+            d.tgt = null;
+            d.idle = 0;
+            d.side = 0;
+            n.position.copy(d.home);
+            n.rotation.set(0, d.ry, 0);
+          }
+          score = 0;
+          stress = 100;
+          $("#score").textContent = 0;
+          $("#pct").textContent = 100;
+          $("#fill").style.width = "0%";
+          boom = false;
+          toast("🧹 사무실 복구 완료! 다시 스트레스를 풀어보세요");
+          flash(0.6);
+        }, EXPLODE_RESET_MS);
+      }
       addEventListener("keydown", (e) => {
         if (e.target && e.target.tagName === "INPUT") return;
         const k = e.key.toLowerCase();
