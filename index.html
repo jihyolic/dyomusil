@@ -1111,7 +1111,7 @@
       }
       const npcs = [];
       const EXEC = {
-        tag: "원장", exec: 1, fem: 1,
+        tag: "광기의 원장", exec: 1, fem: 1,
         suit: 0x5a1f3d, hair: 0x15101a, skin: 0xefc7a8, tie: 0xe8c14a,
         lines: [
           "남이 쓰던 책상 시러엉",
@@ -1540,32 +1540,32 @@
         if (master) return;
         const c = audio.createDynamicsCompressor();
         c.threshold.value = -14;
-        c.ratio.value = 6;
-        master = audio.createGain();
-        master.gain.value = 0.9;
-        master.connect(c);
-        c.connect(audio.destination);
-        const L = Math.floor(audio.sampleRate * 2.4),
-          b = audio.createBuffer(2, L, audio.sampleRate);
-        for (let ch = 0; ch < 2; ch++) {
-          const d = b.getChannelData(ch);
-          for (let i = 0; i < L; i++)
-            d[i] = (R() * 2 - 1) * Math.pow(1 - i / L, 3);
-        }
-        const cv = audio.createConvolver();
-        cv.buffer = b;
-        rev = audio.createGain();
-        rev.gain.value = 0.3;
-        rev.connect(cv);
-        cv.connect(master);
-      }
-      function route(n, wet) {
-        n.connect(master);
-        if (wet) {
-          const s = audio.createGain();
-          s.gain.value = wet;
-          n.connect(s);
-          s.connect(rev);
+        { // ── 벽걸이 원목 원형 거울 (뒷벽)
+          const g = new THREE.Group();
+          g.userData.label = "원목 원형 거울";
+          scene.add(g);
+          // 원목 테두리 (원형)
+          const frame = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.08, 32), woodD);
+          frame.rotation.x = Math.PI / 2;
+          frame.position.set(-4.8, 3.2, -23.86);
+          g.add(frame);
+
+          // 거울 면 (원형)
+          const glassMat = new THREE.MeshStandardMaterial({
+            color: 0xd5e8ee, roughness: 0.04, metalness: 0.85, emissive: 0x2c4a55
+          });
+          const mirror = new THREE.Mesh(new THREE.CircleGeometry(1.05, 32), glassMat);
+          mirror.position.set(-4.8, 3.2, -23.81);
+          g.add(mirror);
+
+          // 거울 반사 하이라이트
+          const sm = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 });
+          [[-5.0, 0.14], [-4.7, 0.07]].forEach(([x, w]) => {
+            const s = new THREE.Mesh(new THREE.PlaneGeometry(w, 1.6), sm);
+            s.position.set(x, 3.2, -23.78);
+            s.rotation.z = 0.45;
+            g.add(s);
+          });
         }
       }
       function nz(d, o = {}) {
@@ -1904,7 +1904,7 @@
           c.strokeStyle = "#c9a34a"; c.lineWidth = 6; c.strokeRect(5, 5, w - 10, h - 10);
           c.fillStyle = "#f0d27a"; c.textAlign = "center";
           c.font = '800 48px "Noto Sans KR","Malgun Gothic",sans-serif';
-          c.fillText("집무실 · 노크 필수", w / 2, 66);
+          c.fillText("원장실 · 노크 필수", w / 2, 66);
         });
         sg.position.set(DX, 4.35, -13.79);
         g.add(sg);
