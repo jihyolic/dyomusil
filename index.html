@@ -529,10 +529,10 @@
       sun.castShadow = true;
       sun.shadow.mapSize.set(2048, 2048);
       Object.assign(sun.shadow.camera, {
-        left: -20,
-        right: 20,
-        top: 20,
-        bottom: -20,
+        left: -30,
+        right: 30,
+        top: 30,
+        bottom: -30,
       });
       scene.add(sun);
       const mat = (c, r = 0.8, m = 0) =>
@@ -577,6 +577,54 @@
       }
       let spots = [],
         furn = [];
+      const DX = 1,
+        DW = 1.15; // 문 x위치 · 문 반폭
+      const roomShell = {},
+        cplanes = [];
+
+      // 집무실 포함 이동 경계 (문으로만 드나들 수 있음)
+      function bnd(p, mx, nz, sz) {
+        const C = THREE.MathUtils.clamp;
+        if (p.z < -14.5) {
+          p.x = C(p.x, -8.5, 8.5);
+          p.z = Math.max(p.z, -23.4);
+          return;
+        }
+        if (p.z < -nz) {
+          if (Math.abs(p.x - DX) < DW - 0.3) return;
+          if (p.z > (-nz - 14.5) / 2) {
+            p.z = -nz;
+            p.x = C(p.x, -mx, mx);
+          } else {
+            p.z = -14.5;
+            p.x = C(p.x, -8.5, 8.5);
+          }
+          return;
+        }
+        p.x = C(p.x, -mx, mx);
+        p.z = Math.min(p.z, sz);
+      }
+
+      // 캔버스 글씨/그림을 입힌 평면 (화이트보드·모니터·문패)
+      function cplane(w, h, cw, ch, draw) {
+        const cv = document.createElement("canvas");
+        cv.width = cw;
+        cv.height = ch;
+        const g = cv.getContext("2d");
+        draw(g, cw, ch);
+        const tx = new THREE.CanvasTexture(cv);
+        tx.colorSpace = THREE.SRGBColorSpace;
+        const m = new THREE.Mesh(
+          new THREE.PlaneGeometry(w, h),
+          new THREE.MeshBasicMaterial({ map: tx, toneMapped: false }),
+        );
+        m.userData.redraw = () => {
+          draw(g, cw, ch);
+          tx.needsUpdate = true;
+        };
+        cplanes.push(m);
+        return m;
+      }
       function loc(x, z, t, lx, lz) {
         return [
           x + lx * Math.cos(t) + lz * Math.sin(t),
@@ -586,12 +634,33 @@
       function buildOffice() {
         // ---- office shell
         box(scene, 0, -0.2, 0, 34, 0.4, 28, M.floor);
-        box(scene, 0, 4, -14, 34, 8, 0.35, M.wall);
+        {
+          const sh = new THREE.Shape(),
+            dl = DX - DW,
+            dr = DX + DW;
+          sh.moveTo(-17, -4);
+          sh.lineTo(dl, -4);
+          sh.lineTo(dl, -0.3);
+          sh.lineTo(dr, -0.3);
+          sh.lineTo(dr, -4);
+          sh.lineTo(17, -4);
+          sh.lineTo(17, 4);
+          sh.lineTo(-17, 4);
+          sh.closePath();
+          const geo = new THREE.ExtrudeGeometry(sh, {
+            depth: 0.35,
+            bevelEnabled: false,
+          });
+          geo.translate(0, 0, -0.175);
+          const bw = new THREE.Mesh(geo, M.wall);
+          bw.position.set(0, 4, -14);
+          bw.castShadow = bw.receiveShadow = true;
+          scene.add(bw);
+        }
         box(scene, -17, 4, 0, 0.35, 8, 28, M.wall);
         box(scene, 17, 4, 0, 0.35, 8, 28, M.wall);
-        for (const x of [-11, -5, 1, 7, 13])
+        for (const x of [-11, -5, 7, 13])
           box(scene, x, 4.1, -13.78, 4.7, 3.1, 0.08, M.glass);
-        box(scene, 0, 3.4, -13.7, 5, 2.1, 0.1, M.paper);
         box(scene, 1, 0.95, -5, 8, 0.22, 2.5, M.wood);
         for (const x of [-2, 0, 2, 4])
           for (const z of [-7.1, -2.9])
@@ -720,17 +789,6 @@
           box(scene, x, y + 0.8, -13.69, 1.4, 0.2, 0.02, M.paper);
           box(scene, x, y - 0.2, -13.69, 1.4, 0.1, 0.02, M.paper);
         });
-        for (let i = 0; i < 5; i++)
-          box(
-            scene,
-            -0.4 - (i % 2) * 0.5,
-            3.95 - i * 0.3,
-            -13.6,
-            3 - (i % 2) * 0.8,
-            0.07,
-            0.02,
-            mat(i % 2 ? 0xc0483c : 0x2d4560),
-          );
         box(scene, -13, 0.75, -9.6, 1.8, 1.5, 1.2, M.paper);
         box(scene, -13, 1.55, -9.6, 0.9, 0.12, 0.8, M.dark);
         box(scene, 13, 0.85, -9.6, 0.9, 1.7, 0.8, M.blue);
@@ -746,6 +804,218 @@
       }
 
       let structure = [];
+      function buildExecRoom() {
+        const wallM = mat(0xe6dccd),
+          woodD = mat(0x6b4a33),
+          woodL = mat(0xb08a62);
+        const keep = (o) => ((o.userData.keep = true), o);
+        // 바닥 · 러그 · 벽
+        keep(box(scene, 0, -0.19, -19.05, 18.7, 0.4, 10.3, mat(0x7d5a41, 0.6)));
+        keep(box(scene, 0, 0.03, -19.4, 9, 0.04, 6.2, mat(0x6a3b3f, 0.95)));
+        keep(box(scene, 0, 0.055, -19.4, 8.4, 0.02, 5.6, mat(0x7c474b, 0.95)));
+        roomShell.L = keep(box(scene, -9, 4, -19.1, 0.35, 8, 10.5, wallM));
+        roomShell.R = keep(box(scene, 9, 4, -19.1, 0.35, 8, 10.5, wallM));
+        roomShell.B = keep(box(scene, 0, 4, -24.1, 18.35, 8, 0.35, wallM));
+        box(roomShell.B, 0, -3.45, 0.21, 17.6, 1.1, 0.06, woodD); // 하단 원목 패널
+        box(roomShell.L, 0.21, -3.45, 0, 0.06, 1.1, 10, woodD);
+        box(roomShell.R, -0.21, -3.45, 0, 0.06, 1.1, 10, woodD);
+        const rl = new THREE.PointLight(0xffd9a8, 50, 22, 1.5);
+        rl.position.set(0, 6.5, -19);
+        scene.add(rl);
+
+        {
+          // ── 원목 데스크 (앉는 쪽이 로컬 +z → 180° 회전)
+          const g = new THREE.Group();
+          g.userData.label = "원목 데스크";
+          g.position.set(0, 0, -20.8);
+          g.rotation.y = Math.PI;
+          scene.add(g);
+          box(g, 0, 0.9, 0, 3.6, 0.16, 1.5, woodL);
+          box(g, 0, 0.84, 0, 3.7, 0.06, 1.6, woodD);
+          for (const sx of [-1.45, 1.45]) {
+            box(g, sx, 0.41, 0.05, 0.7, 0.82, 1.2, woodD);
+            for (let i = 0; i < 3; i++)
+              box(g, sx, 0.2 + i * 0.25, 0.66, 0.58, 0.2, 0.03, woodL);
+          }
+          box(g, 0, 0.5, -0.62, 2.2, 0.7, 0.06, woodD);
+          box(g, 0, 1.5, -0.28, 1.4, 0.8, 0.07, M.dark);
+          cyl(g, 0, 1.08, -0.28, 0.08, 0.1, 0.18, M.metal);
+          box(g, 0, 0.99, -0.25, 0.5, 0.03, 0.3, M.metal);
+          const scr = cplane(1.28, 0.68, 512, 272, (c, w, h) => {
+            c.fillStyle = "#0f1f2a";
+            c.fillRect(0, 0, w, h);
+            c.strokeStyle = "#2a4656";
+            c.lineWidth = 2;
+            for (let i = 1; i < 5; i++) {
+              c.beginPath();
+              c.moveTo(0, (i * h) / 5);
+              c.lineTo(w, (i * h) / 5);
+              c.stroke();
+            }
+            c.strokeStyle = "#ff5a4a";
+            c.lineWidth = 6;
+            c.beginPath();
+            c.moveTo(20, 75);
+            [
+              [110, 100],
+              [190, 90],
+              [260, 150],
+              [330, 140],
+              [420, 215],
+              [490, 240],
+            ].forEach(([x, y]) => c.lineTo(x, y));
+            c.stroke();
+            c.fillStyle = "#fff";
+            c.font = '800 34px "Noto Sans KR","Malgun Gothic",sans-serif';
+            c.fillText("실적 ▼ 전부 다시!!", 24, 44);
+          });
+          scr.position.set(0, 1.5, -0.235);
+          g.add(scr);
+          box(g, 0, 0.995, 0.3, 0.9, 0.03, 0.3, M.dark);
+          box(g, 0, 1.015, 0.3, 0.8, 0.01, 0.22, M.paper);
+          box(g, 0.7, 0.995, 0.32, 0.1, 0.03, 0.16, M.dark);
+          box(g, -1.0, 1.05, -0.55, 0.8, 0.14, 0.05, mat(0xc9a34a, 0.3, 0.6)); // 명패
+          cyl(g, 1.5, 1.0, -0.4, 0.14, 0.16, 0.05, M.dark); // 스탠드
+          cyl(g, 1.5, 1.3, -0.4, 0.02, 0.02, 0.6, M.metal);
+          cyl(g, 1.42, 1.62, -0.38, 0.08, 0.2, 0.2, mat(0x2f6f5a));
+          box(g, 1.0, 1.04, 0.28, 0.5, 0.1, 0.36, M.paper);
+          box(g, -0.9, 1.0, 0.3, 0.4, 0.03, 0.3, M.red);
+          cyl(g, -1.35, 1.06, 0.3, 0.07, 0.06, 0.14, mat(0xc0483c));
+        }
+
+        // ── 3층 계단식 화분대 (좌·우 뒷모서리)
+        const tier = (x, z) => {
+          const g = new THREE.Group();
+          g.userData.label = "계단식 화분대";
+          scene.add(g);
+          for (let i = 0; i < 3; i++) {
+            const h = 0.4 + i * 0.4,
+              zz = z - i * 0.7;
+            box(g, x, h / 2, zz, 2.5, h, 0.7, woodD);
+            for (let k = -1; k <= 1; k++) {
+              const px = x + k * 0.8;
+              cyl(
+                g,
+                px,
+                h + 0.2,
+                zz,
+                0.23,
+                0.17,
+                0.4,
+                mat([0xd9d2c5, 0xc77c54, 0x9aa5a6][i]),
+              );
+              for (let j = 0; j < 5; j++) {
+                const a = j * 1.26,
+                  l = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.2, 8, 6),
+                    M.green,
+                  );
+                l.position.set(
+                  px + Math.cos(a) * 0.14,
+                  h + 0.62 + (j % 2) * 0.12,
+                  zz + Math.sin(a) * 0.14,
+                );
+                l.scale.set(0.7, 1.4, 0.7);
+                l.castShadow = true;
+                g.add(l);
+              }
+            }
+          }
+        };
+        tier(6.2, -21.6);
+        tier(-6.2, -21.6);
+
+        {
+          // ── 화이트보드 (왼쪽 벽)
+          const g = new THREE.Group();
+          g.userData.label = "화이트보드";
+          scene.add(g);
+          box(g, -8.78, 2.9, -18.6, 0.06, 2.5, 4.3, M.metal);
+          box(g, -8.74, 2.9, -18.6, 0.04, 2.3, 4.1, mat(0xf4f6f4, 0.35));
+          box(g, -8.7, 1.68, -18.6, 0.12, 0.06, 3.2, M.metal);
+          const bd = cplane(3.9, 2.1, 1024, 552, (c, w, h) => {
+            c.fillStyle = "#f6f8f5";
+            c.fillRect(0, 0, w, h);
+            const F = '"Noto Sans KR","Malgun Gothic",sans-serif';
+            c.font = "800 66px " + F;
+            c.fillStyle = "#c0392b";
+            c.fillText("이번 분기 목표", 50, 90);
+            c.font = "700 52px " + F;
+            c.fillStyle = "#1f4e8c";
+            [
+              "① 전원 야근 (자발적)",
+              "② 매출 ↑↑↑ 300%",
+              "③ 퇴사 금지",
+              "④ 내 말이 곧 법",
+            ].forEach((t, i) => c.fillText(t, 70, 185 + i * 82));
+            c.strokeStyle = "#c0392b";
+            c.lineWidth = 8;
+            c.beginPath();
+            c.ellipse(310, 488, 300, 44, -0.03, 0, Math.PI * 2);
+            c.stroke();
+            c.beginPath();
+            c.moveTo(640, 480);
+            c.lineTo(760, 430);
+            c.lineTo(735, 420);
+            c.moveTo(760, 430);
+            c.lineTo(742, 455);
+            c.stroke();
+            c.strokeStyle = "#2e7d32";
+            c.lineWidth = 6;
+            c.beginPath();
+            for (let t = 0; t < 40; t += 0.2) {
+              const r = t * 3.4,
+                x = 830 + Math.cos(t) * r,
+                y = 260 + Math.sin(t) * r * 0.8;
+              t ? c.lineTo(x, y) : c.moveTo(x, y);
+            }
+            c.stroke();
+            c.fillStyle = "#2e7d32";
+            c.font = "800 44px " + F;
+            c.fillText("전부 갈아엎기!!", 640, 90);
+          });
+          bd.rotation.y = Math.PI / 2;
+          bd.position.set(-8.71, 2.9, -18.6);
+          g.add(bd);
+        }
+
+        {
+          // ── 벽걸이 원목 거울 (뒷벽)
+          const g = new THREE.Group();
+          g.userData.label = "원목 거울";
+          scene.add(g);
+          box(g, -4.8, 3.2, -23.86, 1.7, 2.7, 0.1, woodD);
+          box(
+            g,
+            -4.8,
+            3.2,
+            -23.8,
+            1.4,
+            2.4,
+            0.03,
+            new THREE.MeshStandardMaterial({
+              color: 0xd5e8ee,
+              roughness: 0.04,
+              metalness: 0.85,
+              emissive: 0x2c4a55,
+            }),
+          );
+          const sm = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.25,
+          });
+          [
+            [-5.15, 0.16],
+            [-4.75, 0.07],
+          ].forEach(([x, w]) => {
+            const s = new THREE.Mesh(new THREE.PlaneGeometry(w, 2.0), sm);
+            s.position.set(x, 3.2, -23.78);
+            s.rotation.z = 0.45;
+            g.add(s);
+          });
+        }
+      }
       function recenter(o) {
         const c = new THREE.Box3().setFromObject(o).getCenter(V()),
           w = new THREE.Group();
@@ -763,7 +1033,9 @@
           .filter((o) => (o.isMesh || o.isGroup) && !o.userData.keep)
           .slice(4);
         structure = furn.filter(
-          (o) => o.position.z < -13.3 || Math.abs(o.position.x) > 16.3,
+          (o) =>
+            (o.position.z < -13.3 && o.position.z > -14.3) ||
+            Math.abs(o.position.x) > 16.3,
         );
         furn.forEach((o) => {
           o.userData.hp = o.position.clone();
@@ -771,6 +1043,7 @@
         });
       }
       buildOffice();
+      buildExecRoom();
       finishFurn();
       // ---- throwable props
       const props = [];
@@ -941,6 +1214,9 @@
         });
       }
       spawnOffice();
+      prop("chair", 0, 0, -22.3, 0, 0x7a3b3b); // 임원 의자
+      prop("chair", -1.4, 0, -18.6, Math.PI, 0x607d8b); // 손님 의자
+      prop("chair", 3.4, 0, -18.6, Math.PI, 0x607d8b);
       // ---- coworkers
       // ---- characters (blocky suit style)
       const SG = new THREE.SphereGeometry(1, 20, 16);
@@ -949,6 +1225,22 @@
         if (mo) mo.scale.set(1, m === "normal" ? 1 : m === "hurt" ? 3 : 6, 1);
       }
       const npcs = [];
+      const EXEC = {
+        tag: "집무실",
+        exec: 1,
+        fem: 1,
+        suit: 0x5a1f3d,
+        hair: 0x15101a,
+        skin: 0xefc7a8,
+        tie: 0xe8c14a,
+        lines: [
+          "돈 안들이는 쪽으로 해",
+          "휴지 1장씩 쓰게 해요",
+          "우리 직원들이 불쌍해",
+          "난 새 책상 사줘엉",
+          "남이 쓰던거 시러엉",
+        ],
+      };
       const BOSS = [
         {
           tag: "꼰대 부장",
@@ -1059,8 +1351,8 @@
         sp.renderOrder = 5;
         return sp;
       }
-      function npc(x, z, ry, type) {
-        const B = BOSS[type % BOSS.length],
+      function npc(x, z, ry, type, Bo) {
+        const B = Bo || BOSS[type % BOSS.length],
           g = new THREE.Group(),
           suit = mat(B.suit),
           skin = mat(B.skin);
@@ -1116,6 +1408,50 @@
         if (B.glasses) box(g, 0, 1.72, 0.29, 0.06, 0.015, 0.015, M.dark);
         if (B.shades) box(g, 0, 1.71, 0.29, 0.46, 0.1, 0.05, M.dark);
         const mo = box(g, 0, 1.58, 0.29, 0.12, 0.03, 0.03, M.dark);
+        const shins = [];
+        if (B.fem) {
+          const hm = mat(B.hair);
+          box(g, 0, 1.55, -0.22, 0.66, 0.9, 0.2, hm);
+          box(g, -0.3, 1.62, -0.02, 0.1, 0.62, 0.36, hm);
+          box(g, 0.3, 1.62, -0.02, 0.1, 0.62, 0.36, hm);
+          for (let i = 0; i < 10; i++) {
+            // 산발 머리
+            const s = box(
+              g,
+              (R() - 0.5) * 0.7,
+              2.08 + R() * 0.08,
+              (R() - 0.5) * 0.4,
+              0.05,
+              0.35 + R() * 0.3,
+              0.05,
+              hm,
+            );
+            s.rotation.z = (R() - 0.5) * 1.6;
+            s.rotation.x = (R() - 0.5) * 0.9;
+          }
+          for (const sd of [-0.13, 0.13]) {
+            // 휘둥그레 눈
+            const w = new THREE.Mesh(
+              new THREE.SphereGeometry(0.075, 10, 8),
+              M.paper,
+            );
+            w.position.set(sd, 1.71, 0.26);
+            g.add(w);
+            const pu = new THREE.Mesh(
+              new THREE.SphereGeometry(0.025, 8, 8),
+              M.dark,
+            );
+            pu.position.set(sd * 0.8, 1.71, 0.33);
+            g.add(pu);
+          }
+          mo.material = mat(0xb0203a);
+          cyl(g, 0, 0.62, 0, 0.36, 0.46, 0.45, suit); // 치마
+          for (const sd of [-0.17, 0.17]) {
+            const s = box(g, sd, 0.28, 0.62, 0.2, 0.55, 0.22, M.navy);
+            s.visible = false;
+            shins.push(s);
+          }
+        }
         const ar = [];
         for (const sd of [-0.42, 0.42])
           ar.push(box(g, sd, 1.0, 0.05, 0.18, 0.65, 0.2, suit));
@@ -1145,6 +1481,8 @@
           mouth: mo,
           legs: lg,
           arms: ar,
+          shins: shins,
+          exec: !!B.exec,
         };
         npcs.push(g);
         return g;
@@ -1163,6 +1501,8 @@
         [3, 11, Math.PI],
         [-3, 11, Math.PI],
       ].forEach((a, i) => npc(a[0], a[1], a[2], i + 2));
+      const exec = npc(0, -21.85, 0, 0, EXEC);
+      setSeat(exec, true);
       // ---- player
       const avatar = new THREE.Group();
       scene.add(avatar);
@@ -1639,8 +1979,150 @@
         if (d.soft && performance.now() < d.soft) relieve(BAL.shoutPropScore);
         else relieve(BAL.throwScore + (d.furn ? 1 : 0));
       }
+      function setSeat(n, on) {
+        const d = n.userData;
+        if (!d.shins || d.sit === on) return;
+        d.sit = on;
+        [-0.17, 0.17].forEach((sd, i) => {
+          const L = d.legs[i];
+          if (on) {
+            L.position.set(sd, 0.66, 0.36);
+            L.rotation.x = -Math.PI / 2;
+          } else {
+            L.position.set(sd, 0.35, 0);
+            L.rotation.x = 0;
+          }
+          d.shins[i].visible = on;
+        });
+        [-0.42, 0.42].forEach((sd, i) => {
+          const A = d.arms[i];
+          if (on) {
+            A.position.set(sd, 1.02, 0.3);
+            A.rotation.x = -1.25;
+          } else {
+            A.position.set(sd, 1.0, 0.05);
+            A.rotation.x = 0;
+          }
+        });
+      }
+      function execAI(n, d, now, dt) {
+        n.position.y = 0;
+        const hx = d.home.x - n.position.x,
+          hz = d.home.z - n.position.z,
+          hd = Math.hypot(hx, hz);
+        const pd = Math.hypot(
+          avatar.position.x - n.position.x,
+          avatar.position.z - n.position.z,
+        );
+        d.flee = pd < 4; // 가까이 가면 입 벌리고 소리 지르는 표정
+        if (hd > 0.25) {
+          // 맞고 나서 자리로 돌아가는 중
+          setSeat(n, false);
+          const step = Math.min(2.2 * dt, hd),
+            t = now * 0.012 + d.ph;
+          n.position.x += (hx / hd) * step;
+          n.position.z += (hz / hd) * step;
+          n.rotation.y = Math.atan2(hx, hz);
+          d.legs[0].rotation.x = Math.sin(t) * 0.6;
+          d.legs[1].rotation.x = -Math.sin(t) * 0.6;
+          d.arms[0].rotation.x = -Math.sin(t) * 0.4;
+          d.arms[1].rotation.x = Math.sin(t) * 0.4;
+          return;
+        }
+        n.position.x = d.home.x;
+        n.position.z = d.home.z;
+        setSeat(n, true);
+        n.rotation.y = d.ry;
+        const t = now * 0.03; // 타자 치는 팔
+        d.arms[0].rotation.x = -1.25 + Math.sin(t) * 0.1;
+        d.arms[1].rotation.x = -1.25 + Math.sin(t + 2) * 0.1;
+        if (pd < 7 && now > (d.say || 0) && R() < 0.02) {
+          d.say = now + 3800;
+          pop(
+            d.lines[(R() * d.lines.length) | 0],
+            n.position.clone().add(V(0, 2.9, 0)),
+            "#7a1f1f",
+          );
+        }
+      }
+      // 문 · 집무실 시야 처리
+      let doorG = null,
+        doorLeaf = null,
+        roomState = false;
+      function buildDoor() {
+        const dk = mat(0x5a3d2b),
+          g = new THREE.Group();
+        box(g, DX - DW - 0.07, 1.9, -14, 0.14, 3.8, 0.55, dk);
+        box(g, DX + DW + 0.07, 1.9, -14, 0.14, 3.8, 0.55, dk);
+        box(g, DX, 3.77, -14, DW * 2 + 0.28, 0.16, 0.55, dk);
+        doorLeaf = new THREE.Group();
+        doorLeaf.position.set(DX - DW, 0, -14);
+        box(
+          doorLeaf,
+          DW,
+          1.75,
+          0,
+          DW * 2 - 0.04,
+          3.5,
+          0.08,
+          mat(0x9a6b45, 0.7),
+        );
+        box(doorLeaf, DW, 2.6, 0.05, 1.7, 0.9, 0.02, mat(0x8a5d3b));
+        box(doorLeaf, DW, 0.95, 0.05, 1.7, 1.2, 0.02, mat(0x8a5d3b));
+        for (const z of [0.08, -0.08]) {
+          const hd = new THREE.Mesh(
+            new THREE.SphereGeometry(0.07, 10, 8),
+            mat(0xd4af37, 0.3, 0.7),
+          );
+          hd.position.set(DW * 2 - 0.25, 1.7, z);
+          doorLeaf.add(hd);
+        }
+        g.add(doorLeaf);
+        const sg = cplane(2.6, 0.5, 520, 100, (c, w, h) => {
+          c.fillStyle = "#2b2320";
+          c.fillRect(0, 0, w, h);
+          c.strokeStyle = "#c9a34a";
+          c.lineWidth = 6;
+          c.strokeRect(5, 5, w - 10, h - 10);
+          c.fillStyle = "#f0d27a";
+          c.textAlign = "center";
+          c.font = '800 48px "Noto Sans KR","Malgun Gothic",sans-serif';
+          c.fillText("전무실 · 노크 필수", w / 2, 66);
+        });
+        sg.position.set(DX, 4.35, -13.79);
+        g.add(sg);
+        scene.add(g);
+        doorG = g;
+        if (document.fonts)
+          document.fonts.ready.then(() =>
+            cplanes.forEach((p) => p.userData.redraw()),
+          );
+      }
+      function roomTick(dt) {
+        const a = avatar.position,
+          bw = walls[0],
+          inR = a.z < -14.5;
+        const tgt = Math.hypot(a.x - DX, a.z + 14) < 4 ? 1.75 : 0; // 가까이 가면 문이 열림
+        doorLeaf.rotation.y +=
+          (tgt - doorLeaf.rotation.y) * Math.min(1, dt * 6);
+        doorG.visible = !bw.broken;
+        if (!bw.broken && inR !== roomState) {
+          // 집무실 안에선 사무실 뒷벽을 반투명하게
+          roomState = inR;
+          const m = bw.m.material;
+          m.transparent = inR;
+          m.opacity = inR ? 0.15 : 1;
+          m.depthWrite = !inR;
+          m.needsUpdate = true;
+          bw.parts.forEach((o) => (o.visible = !inR));
+        }
+        roomShell.L.visible = camera.position.x > -9; // 카메라가 벽 밖이면 벽 숨김
+        roomShell.R.visible = camera.position.x < 9;
+        roomShell.B.visible = camera.position.z > -24.1;
+      }
       function knock(n, dir, power, txt, quiet) {
         const d = n.userData;
+        if (d.exec) setSeat(n, false);
         d.v.copy(dir).multiplyScalar(power);
         d.v.y = power * 0.45;
         d.down = performance.now() + 2600;
@@ -1652,7 +2134,7 @@
           "#2d6a8a",
         );
         sfx.hit();
-        if (!quiet) relieve(4);
+        if (!quiet) relieve(d.exec ? 10 : 4);
         shake = Math.max(shake, 0.3);
       }
       const fwd = () =>
@@ -1665,6 +2147,7 @@
         "왜 이래?!",
       ];
       function npcAI(n, d, now, dt) {
+        if (d.exec) return execAI(n, d, now, dt);
         n.position.y = 0;
         const dx = n.position.x - avatar.position.x,
           dz = n.position.z - avatar.position.z,
@@ -1709,16 +2192,9 @@
           const l = Math.hypot(mx, mz) || 1;
           mx /= l;
           mz /= l;
-          n.position.x = THREE.MathUtils.clamp(
-            n.position.x + mx * sp * dt,
-            -16,
-            16,
-          );
-          n.position.z = THREE.MathUtils.clamp(
-            n.position.z + mz * sp * dt,
-            -12.5,
-            12.5,
-          );
+          n.position.x += mx * sp * dt;
+          n.position.z += mz * sp * dt;
+          bnd(n.position, 16, 12.5, 12.5);
           n.rotation.y = Math.atan2(mx, mz);
           const t = now * (sp > 3 ? 0.018 : 0.009) + d.ph;
           L[0].rotation.x = Math.sin(t) * 0.6;
@@ -2283,8 +2759,9 @@
           a = avatar.position;
         for (const w of walls) {
           if (w.broken) continue;
+          if (w === walls[0] && Math.abs(a.x - DX) < DW) continue; // 문 앞에서는 벽 안 때림
           const d = w.sg < 0 ? a[w.ax] - w.p : w.p - a[w.ax];
-          if (d < 1.9 && f[w.ax] * w.sg > 0.35) return { w, d };
+          if (d > -0.5 && d < 1.9 && f[w.ax] * w.sg > 0.35) return { w, d };
         }
         return null;
       }
@@ -2410,6 +2887,7 @@
       }
       registerFurn();
       initWalls();
+      buildDoor();
       // ---- ranked mode (60s) + leaderboard
       const RK = { state: "idle", end: 0, score: 0 };
       let myName = "";
@@ -2698,16 +3176,7 @@
               fwd(),
               THREE.MathUtils.clamp(f, -1, 1) * BAL.moveSpeed * dt,
             );
-            avatar.position.x = THREE.MathUtils.clamp(
-              avatar.position.x,
-              -16.1,
-              16.1,
-            );
-            avatar.position.z = THREE.MathUtils.clamp(
-              avatar.position.z,
-              -13,
-              12,
-            );
+            bnd(avatar.position, 16.1, 13, 12);
           }
           moving = true;
         }
@@ -2781,11 +3250,10 @@
                 if (sp > 2.5) sfx.hit();
               }
             }
-            const bx = THREE.MathUtils.clamp(p.position.x, -16.2, 16.2),
-              bz = THREE.MathUtils.clamp(p.position.z, -12.8, 12.8);
+            const bx = p.position.x,
+              bz = p.position.z;
+            bnd(p.position, 16.2, 12.8, 12.8);
             if (bx !== p.position.x || bz !== p.position.z) {
-              p.position.x = bx;
-              p.position.z = bz;
               if (sp > 7) smash(p, true);
               else {
                 v.x *= -0.4;
@@ -2819,8 +3287,7 @@
               d.v.z *= 0.8;
               d.v.y = 0;
             }
-            n.position.x = THREE.MathUtils.clamp(n.position.x, -16, 16);
-            n.position.z = THREE.MathUtils.clamp(n.position.z, -12.5, 12.5);
+            bnd(n.position, 16, 12.5, 12.5);
             n.rotation.x = THREE.MathUtils.lerp(n.rotation.x, -1.45, 0.2);
           } else {
             n.rotation.x = THREE.MathUtils.lerp(n.rotation.x, 0, 0.12);
@@ -2875,8 +3342,7 @@
               d.fs.set(0, 0, 0);
             }
           }
-          o.position.x = THREE.MathUtils.clamp(o.position.x, -16.5, 16.5);
-          o.position.z = THREE.MathUtils.clamp(o.position.z, -13, 13);
+          bnd(o.position, 16.5, 13, 13);
         }
         for (let i = fires.length - 1; i >= 0; i--) {
           const m = fires[i],
@@ -2895,6 +3361,7 @@
           }
         }
         boomLight.intensity = Math.max(0, boomLight.intensity - dt * 500);
+        roomTick(dt);
         rankTick(now);
         const camTarget = avatar.rotation.y + Math.PI;
         let camDiff = Math.atan2(
