@@ -1540,14 +1540,7 @@
         if (master) return;
         const c = audio.createDynamicsCompressor();
         c.threshold.value = -14;
-        c.connect(audio.destination);
-        master = c;
-      }
-      function route(v, wet = 0.15) {
-        if (!master) bus();
-        v.connect(master);
-      }
-      { // ── 벽걸이 원목 원형 거울 (뒷벽)
+        { // ── 벽걸이 원목 원형 거울 (뒷벽)
           const g = new THREE.Group();
           g.userData.label = "원목 원형 거울";
           scene.add(g);
@@ -2462,7 +2455,6 @@
         soundOn = !soundOn;
         if (soundOn) {
           initAudio();
-          bus();
           tone(660, 0.08, "sine", 0.04);
         }
         $("#sound").textContent = soundOn ? "🔊 효과음 ON" : "🔇 효과음 OFF";
