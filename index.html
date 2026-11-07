@@ -2455,7 +2455,6 @@
         soundOn = !soundOn;
         if (soundOn) {
           initAudio();
-          bus();
           tone(660, 0.08, "sine", 0.04);
         }
         $("#sound").textContent = soundOn ? "🔊 효과음 ON" : "🔇 효과음 OFF";
@@ -2534,16 +2533,13 @@
       crackG.userData.keep = true;
       scene.add(crackG);
       function initWalls() {
-        // 사무실 3면 + 원장실 3면 = 모든 벽을 동일한 파괴 대상으로 등록
+        const ms = scene.children.filter((o) => o.isMesh).slice(1, 4);
         [
-          ["z", -1, -13.6, scene.children.filter((o) => o.isMesh)[1]],
-          ["x", -1, -16.65, scene.children.filter((o) => o.isMesh)[2]],
-          ["x", 1, 16.65, scene.children.filter((o) => o.isMesh)[3]],
-          ["x", -1, -9, roomShell.L],
-          ["x", 1, 9, roomShell.R],
-          ["z", -1, -24.1, roomShell.B],
-        ].forEach(([ax, sg, p, m]) => {
-          if (!m) return;
+          ["z", -1, MODE === "office" ? -13.6 : -13.5],
+          ["x", -1, -16.65],
+          ["x", 1, 16.65],
+        ].forEach(([ax, sg, p], i) => {
+          const m = ms[i];
           m.material = m.material.clone();
           walls.push({
             ax,
@@ -2556,10 +2552,10 @@
             base: m.material.color.clone(),
             parts: structure.filter((o) =>
               ax === "z"
-                ? Math.abs(o.position.z - p) < 0.7
+                ? o.position.z < -13.3
                 : sg < 0
-                  ? o.position.x < p + 0.7
-                  : o.position.x > p - 0.7,
+                  ? o.position.x < -16.3
+                  : o.position.x > 16.3,
             ),
           });
         });
@@ -2586,39 +2582,28 @@
         w.hp++;
         const pt = w.ax === "z" ? V(c, y, w.p) : V(w.p, y, c);
         burst(pt.clone(), col, 7, 5);
-        // 검은 막대 몇 개가 아니라, 충격점에서 갈라지는 불규칙한 균열을 만든다.
-        const branches = 2 + ((R() * 3) | 0);
-        for (let i = 0; i < branches; i++) {
-          const ang = R() * Math.PI * 2;
-          const length = (0.7 + R() * 0.9) * (0.7 + w.hp * 0.12);
-          const pts = [];
-          let px = c + (R() - 0.5) * 0.12;
-          let py = y + (R() - 0.5) * 0.12;
-          for (let j = 0; j < 4; j++) {
-            const k = j / 3;
-            px += Math.cos(ang + (R() - 0.5) * 0.8) * length * 0.34;
-            py += Math.sin(ang + (R() - 0.5) * 0.8) * length * 0.34;
-            pts.push(w.ax === "z" ? V(px, py, w.p - w.sg * 0.035) : V(w.p - w.sg * 0.035, py, px));
+        const n = 3 + ((R() * 2) | 0),
+          len = 0.5 + w.hp * 0.14;
+        for (let i = 0; i < n; i++) {
+          const L = len * (0.5 + R() * 0.8),
+            ang = R() * Math.PI,
+            off = (R() - 0.5) * 0.5 * (w.hp / 4),
+            jy = y + (R() - 0.5) * 0.5,
+            m = new THREE.Mesh(
+              w.ax === "z"
+                ? new THREE.BoxGeometry(L, 0.05, 0.02)
+                : new THREE.BoxGeometry(0.02, L, 0.05),
+              crackM,
+            );
+          if (w.ax === "z") {
+            m.position.set(c + off, jy, w.p - w.sg * 0.03);
+            m.rotation.z = ang;
+          } else {
+            m.position.set(w.p - w.sg * 0.03, jy, c + off);
+            m.rotation.x = ang;
           }
-          const geo = new THREE.BufferGeometry().setFromPoints(pts);
-          const line = new THREE.Line(geo, crackM);
-          line.renderOrder = 4;
-          crackG.add(line);
-          w.cr.push(line);
-          // 큰 균열에서 짧은 가지 균열을 추가
-          if (w.hp >= 5 && R() < 0.8) {
-            const mid = pts[1].clone(), side = [];
-            side.push(mid.clone());
-            for (let j = 1; j < 3; j++) {
-              const q = mid.clone();
-              if (w.ax === "z") q.x += (R() - 0.5) * 0.8; else q.z += (R() - 0.5) * 0.8;
-              q.y += (R() - 0.5) * 0.7;
-              side.push(q);
-            }
-            const sg = new THREE.BufferGeometry().setFromPoints(side);
-            const sl = new THREE.Line(sg, crackM);
-            crackG.add(sl); w.cr.push(sl);
-          }
+          crackG.add(m);
+          w.cr.push(m);
         }
         w.m.material.color.copy(w.base).multiplyScalar(1 - w.hp * 0.025);
         sfx.crack();
